@@ -2,6 +2,7 @@
 // Created by dawndevil on 2018/4/6.
 //
 #include <iostream>
+#include <vector>
 #include <memory> #include <vector>
 #include "StringLine.h"
 
@@ -10,7 +11,7 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
     int lineNumber = 1;
     auto it = s->begin();
     //StringLine
-    auto sl = std::make_shared<StringLine>(lineNumber, new std::string());
+    auto sl = std::make_shared<StringLine>(lineNumber, std::string());
     //判断是否已经设置行数
     bool countLine = false;
     while (it != s->end()) {
@@ -32,9 +33,9 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
          * 偶遇换行符考虑存储行号和该行的数据
          */
         } else if (*it == '\n') {
-            if (!sl->getText()->empty()) {
+            if (!sl->getText().empty()) {
                 sls.push_back(sl);
-                sl = std::make_shared<StringLine>(lineNumber, new std::string());
+                sl = std::make_shared<StringLine>(lineNumber, std::string());
                 countLine = false;
             }
             ++lineNumber;
@@ -46,7 +47,7 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
                 sl->setLine(lineNumber);
                 countLine = true;
             }
-            sl->getText()->push_back(*it);
+            sl->getText().push_back(*it);
         }
         ++it;
     }

@@ -2,24 +2,24 @@
 #define C_STRINGLINE_H
 
 #include <string>
-#include <vector>
+#include <utility> #include <vector>
 #include <memory>
 
 class StringLine {
 public:
     StringLine() = default;
 
-    StringLine(int line, std::string *text) : line(line), text(text) {}
+    StringLine(int line, std::string text) : line(line), text(std::move(text)) {}
 
-    ~StringLine() { delete this->text; }
+    ~StringLine() = default;
 
-    inline int getLine() { return this->line; }
+    int getLine() { return line; }
 
-    inline void setLine(int line) { this->line = line; }
+    void setLine(int line) { this->line = line; }
 
-    inline std::string *getText() { return this->text; }
+    std::string &getText() { return text; }
 
-    inline void setText(std::string *text) { this->text = text; }
+    void setText(std::string text) { this->text = std::move(text); }
 
     /**
      * 转换字符串为StringLine对象，便于之后换取行数和列数
@@ -31,7 +31,7 @@ private:
     //行数
     int line;
     //该行文本
-    std::string *text;
+    std::string text;
 };
 
 

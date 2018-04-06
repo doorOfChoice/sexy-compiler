@@ -3,6 +3,7 @@
 #include <memory>
 #include<vector>
 #include "StringLine.h"
+#include "Table.h"
 
 using namespace std;
 
@@ -29,10 +30,54 @@ shared_ptr<string> readCode(const string &fname) {
     return s;
 }
 
+bool isKey(char ch, bool isHead = false) {
+    if(!isHead)
+        return isalpha(ch) || ch == '_' || ch == '$' || isdigit(ch);
+    return isalpha(ch) || ch == '_' || ch == '$' ;
+}
+
+
+/**
+ * 生成token表
+ * @return
+ */
+void analyseLines(vector<shared_ptr<StringLine>> &lines, Table &table) {
+    for (const auto &line : lines) {
+        string buf;
+        auto begin = line->getText().begin();
+        for (auto it = begin; it != line->getText().end(); it++) {
+            if (!isblank(*it)) {
+                buf.push_back(*it);
+                int column = it - begin + 1;
+                if (isKey(*it, true)) {
+                    while (isKey(*(++it))) {
+                        buf.push_back(*it);
+                    }
+                    int type = table.inKey(buf) ? Token::KEY_WORD : Token::IDENTIFIER;
+                    table.addIdentifier(buf);
+                    Token t(line->getLine(), column, type, buf);
+                    table.addToken(t);
+                    buf.clear();
+                    --it;
+                }else if(table.inDelimiter(*it)) {
+                    Token t(line->getLine(), column, Token::DELIMITERS, buf);
+                    table.addToken(t);
+                    buf.clear();
+                }
+            }
+        }
+    }
+}
+
 
 int main() {
-    auto v = StringLine::convertString(readCode("code.java").get());
-    for (const auto &it : v) {
-        cout << it->getLine() << " " << *it->getText() << endl;
+    auto lines = StringLine::convertString(readCode("code.java").get());
+    Table table;
+    table.loadAll();
+
+    analyseLines(lines, table);
+    for(auto v : table.getTokens()) {
+        cout << v << endl;
     }
+
 }
