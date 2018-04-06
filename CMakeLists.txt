@@ -3,4 +3,4 @@ project(c__)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(c__ main.cpp StringLine.cpp StringLine.h)
+add_executable(c__ src/main.cpp src/StringLine.cpp src/StringLine.h)
