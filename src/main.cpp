@@ -20,7 +20,7 @@ shared_ptr<string> readCode(const string &fname) {
     char buf[4096];
     if (f.is_open()) {
         while (!f.eof()) {
-            f.getline(buf, sizeof(buf)/sizeof(char));
+            f.getline(buf, sizeof(buf) / sizeof(char));
             s->append(buf);
             s->append("\n");
         }
@@ -37,12 +37,15 @@ vector<ErrorInfoException> errorInfos;
 int main() {
     try {
         auto lines = StringLine::convertString(readCode("code.java").get());
+        for (shared_ptr<StringLine> &v:lines) {
+            cout << v->getLine() << ":" << v->getText() << endl;
+        }
         table.loadAll();
         table.analyseLines(lines);
-        for(const auto &v : table.getTokens()) {
+        for (const auto &v : table.getTokens()) {
             cout << v.to_string() << endl;
         }
-    }catch (ErrorInfoException &e) {
+    } catch (ErrorInfoException &e) {
         errorInfos.push_back(e);
     }
 }

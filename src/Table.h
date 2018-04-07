@@ -32,7 +32,7 @@ public:
 
     bool inKey(const std::string &key);
 
-    bool inIdentifier(const std::string &key);
+//    bool inIdentifier(const std::string &key);
 
     bool inDelimiter(const std::string &key);
 

@@ -12,14 +12,14 @@ bool isKey(char ch, bool isHead = false) {
     return isalpha(ch) || ch == '_' || ch == '$';
 }
 
-std::set<std::string> loadMap(const std::string &fname) {
+std::set<std::string> load(const std::string &fname) {
     std::fstream f;
     f.open(fname, std::ios::in);
-    char buf[100];
+    char buf[4096];
     if (f.is_open()) {
         std::set<std::string> set;
         while (!f.eof()) {
-            f.getline(buf, 100);
+            f.getline(buf, sizeof(buf) / sizeof(char));
             set.insert({buf});
         }
         return set;
@@ -29,15 +29,15 @@ std::set<std::string> loadMap(const std::string &fname) {
 }
 
 void Table::loadKeyWords(const std::string &fname) {
-    this->keyWords = loadMap(fname);
+    this->keyWords = load(fname);
 }
 
 void Table::loadOperators(const std::string &fname) {
-    this->operators = loadMap(fname);
+    this->operators = load(fname);
 }
 
 void Table::loadDelimiters(const std::string &fname) {
-    this->delimiters = loadMap(fname);
+    this->delimiters = load(fname);
 }
 
 const std::set<std::string> &Table::getKeyWords() {
@@ -60,9 +60,9 @@ bool Table::inKey(const std::string &key) {
     return std::find(keyWords.begin(), keyWords.end(), key) != keyWords.end();
 }
 
-bool Table::inIdentifier(const std::string &key) {
-    return std::find(identifiers.begin(), identifiers.end(), key) != identifiers.end();
-}
+//bool Table::inIdentifier(const std::string &key) {
+//    return std::find(identifiers.begin(), identifiers.end(), key) != identifiers.end();
+//}
 
 bool Table::inDelimiter(const std::string &key) {
     return std::find(delimiters.begin(), delimiters.end(), key) != delimiters.end();
@@ -104,11 +104,11 @@ void Table::analyseLines(std::vector<std::shared_ptr<StringLine>> lines) {
                     Token t(line->getLine(), column, type, buf);
                     addToken(t);
                     --it;
-                //判断分隔符
+                    //判断分隔符
                 } else if (inDelimiter(buf)) {
                     Token t(line->getLine(), column, Token::DELIMITERS, buf);
                     addToken(t);
-                //判断数字
+                    //判断数字
                 } else if (isdigit(*it)) {
                     while (isdigit(*(++it))) {
                         buf.push_back(*it);
@@ -122,16 +122,16 @@ void Table::analyseLines(std::vector<std::shared_ptr<StringLine>> lines) {
                     --it;
                     Token t(line->getLine(), column, Token::NUMBER, buf);
                     addToken(t);
-                //判断运算符
-                }else if(inOperator(buf)) {
-                    while(inOperator(buf)) {
+                    //判断运算符
+                } else if (inOperator(buf)) {
+                    while (inOperator(buf)) {
                         buf.push_back(*(++it));
                     }
                     buf.pop_back();
                     --it;
                     Token t(line->getLine(), column, Token::OPERATOR, buf);
                     addToken(t);
-                //判断未知字符
+                    //判断未知字符
                 } else {
                     Token t(line->getLine(), column, -1, buf);
                     addToken(t);
