@@ -4,42 +4,49 @@
 #include <iostream>
 #include <vector>
 #include <memory>
-#include <vector>
 #include "StringLine.h"
 #include "ErrorInfoException.h"
-/**
- * 去除包含\n在内的Left AND Right 空白字符
- * @param s
- * @return
- */
-std::string trim(const std::string &s) {
-    std::string str = s;
-    str.replace(0, str.size() - 1, '\n', ' ');
-    str.erase(0, str.find_first_not_of(' '));
-    str.erase(str.find_last_not_of(' ') + 1, str.size());
-    return str;
-}
+#include "StringUtil.h"
 
-std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *s) {
+/**
+ * 有限状态机进行去注释，但是保留相应的行数和列数
+ *
+ * 本状态机主要分为7个状态
+ * 状态0: 扫描到第一个/或者普通字符，可以跳转 状态1 和 状态7
+ * 状态1: 扫描到第二个/, 可以跳转 状态2 和 状态四
+ * 状态7: 扫描到普通字符, 可以跳转到 状态7 和 状态1 和 状态3
+ * 状态2: 扫描到非换行符, 可以跳转到 状态2 和 状态3
+ * 状态4: 扫描到非*字符, 可以跳转到 状态4 和 状态5
+ * 状态5: 扫描到最后一个/，可以跳转 状态4 和 状态0
+ * @param s 需要进行分割的文本
+ * @return StringLine集合 + 错误信息列表
+ */
+std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>>
+StringLine::convertString(std::string *s) {
     std::vector<std::shared_ptr<StringLine>> sls;
+    std::vector<ErrorInfoException> errors;
     int lineNumber = 1;
     auto it = s->begin();
     //StringLine
     auto sl = std::make_shared<StringLine>(lineNumber, std::string());
     int state = 0;
+    //判断当前扫描的字符串是否在注释中
     bool isAnnotation = false;
+    //判断注释是否在字符串中
+    bool annotationInString = false;
     while (it != s->end()) {
         switch (state) {
             //初始读取状态，判断是注释还是普通字符
             case 0: {
-                if (*it == '/')state = 1;
+                //注释如果在字符里面，就不进行跳转，当作普通字符处理
+                if (*it == '/' && !annotationInString)state = 1;
                 else {
                     state = 7;
                     --it;
                 }
                 break;
             }
-             //判断第二个/，或者第一个*
+                //判断第二个/，或者第一个*
             case 1: {
                 if (*it == '/')state = 2;
                 else if (*it == '*')state = 4;
@@ -49,7 +56,7 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
                 }
                 break;
             }
-             // 判断是//注释，还是换行停止
+                // 判断是//注释，还是换行停止
             case 2: {
                 if (*it == '\n') {
                     state = 3;
@@ -60,32 +67,32 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
                 }
                 break;
             }
-             //处理已经读取了一行的情况
+                //处理已经读取了一行的情况
             case 3: {
-                if (!trim(sl->getText()).empty()) {
+                if (!StringUtil::trim(sl->getText()).empty()) {
                     sls.push_back(sl);
                 }
                 sl = std::make_shared<StringLine>(lineNumber, std::string());
                 ++lineNumber;
-                state = isAnnotation? 4 : 0;
+                state = isAnnotation ? 4 : 0;
                 break;
             }
-             // 处理/*注释
+                // 处理/*注释
             case 4: {
                 if (*it == '*')state = 5;
                 else {
                     isAnnotation = true;
-                    if (*it == '\n'){
+                    if (*it == '\n') {
                         state = 3;
                         --it;
-                    }else {
+                    } else {
                         sl->getText().push_back(' ');
                         state = 4;
                     }
                 }
                 break;
             }
-             // 判断*后面是否是/
+                // 判断*后面是否是/
             case 5: {
                 if (*it == '/') {
                     sl->getText().append("    ");
@@ -97,13 +104,14 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
                 }
                 break;
             }
-             //读取普通字符
+                //读取普通字符
             case 7: {
-                if (*it == '/') {
+                if (*it == '"') annotationInString = !annotationInString;
+                if (*it == '/' && !annotationInString) {
                     state = 0;
                     --it;
                 } else if (*it != '\n') {
-                        sl->setLine(lineNumber);
+                    sl->setLine(lineNumber);
                     sl->getText().push_back(*it);
                     state = 7;
                 } else {
@@ -111,9 +119,13 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
                     --it;
                 }
             }
-            default:;
+            default: {
+            }
         }
         ++it;
     }
-    return sls;
+    if (isAnnotation) {
+        errors.emplace_back(-1, -1, "注释没有结尾");
+    }
+    return std::make_pair(sls, errors);
 }

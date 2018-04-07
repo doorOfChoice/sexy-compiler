@@ -1,7 +1,7 @@
-//
-// Created by dawndevil on 2018/4/7.
-//
-
+/**
+ * Token 结构
+ * 单纯的用来存储数据
+ */
 #ifndef C_TOKEN_H
 #define C_TOKEN_H
 

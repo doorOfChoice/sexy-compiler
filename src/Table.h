@@ -1,7 +1,7 @@
-//
-// Created by dawndevil on 2018/4/6.
-//
-
+/**
+ *  词法分析表，词法分析核心表
+ *  包括加载关键字、生成Token表等方法
+ */
 #ifndef C_TOKENTABLE_H
 #define C_TOKENTABLE_H
 

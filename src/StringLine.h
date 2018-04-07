@@ -1,3 +1,7 @@
+/**
+ * 字符串行
+ * 可以轻松的获取某一个字符串在源文本中的列数和行数
+ */
 #ifndef C_STRINGLINE_H
 #define C_STRINGLINE_H
 
@@ -5,6 +9,7 @@
 #include <utility>
 #include <vector>
 #include <memory>
+#include "ErrorInfoException.h"
 
 class StringLine {
 public:
@@ -26,7 +31,7 @@ public:
      * 转换字符串为StringLine对象，便于之后换取行数和列数
      * @return
      */
-    static std::vector<std::shared_ptr<StringLine>> convertString(std::string *);
+    static std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>> convertString(std::string *);
 
 private:
     //行数

@@ -3,14 +3,10 @@
 //
 
 #include "Table.h"
+#include "StringUtil.h"
 #include <fstream>
 #include <iostream>
 
-bool isKey(char ch, bool isHead = false) {
-    if (!isHead)
-        return isalpha(ch) || ch == '_' || ch == '$' || isdigit(ch);
-    return isalpha(ch) || ch == '_' || ch == '$';
-}
 
 std::set<std::string> load(const std::string &fname) {
     std::fstream f;
@@ -95,8 +91,8 @@ void Table::analyseLines(std::vector<std::shared_ptr<StringLine>> lines) {
             if (!isblank(*it)) {
                 buf.push_back(*it);
                 //判断关键字
-                if (isKey(*it, true)) {
-                    while (isKey(*(++it))) {
+                if (StringUtil::isKey(*it, true)) {
+                    while (StringUtil::isKey(*(++it))) {
                         buf.push_back(*it);
                     }
                     int type = inKey(buf) ? Token::KEY_WORD : Token::IDENTIFIER;

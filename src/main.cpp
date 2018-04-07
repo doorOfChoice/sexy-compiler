@@ -37,11 +37,11 @@ vector<ErrorInfoException> errorInfos;
 int main() {
     try {
         auto lines = StringLine::convertString(readCode("code.java").get());
-        for (shared_ptr<StringLine> &v:lines) {
+        for (shared_ptr<StringLine> &v:lines.first) {
             cout << v->getLine() << ":" << v->getText() << endl;
         }
         table.loadAll();
-        table.analyseLines(lines);
+        table.analyseLines(lines.first);
         for (const auto &v : table.getTokens()) {
             cout << v.to_string() << endl;
         }
