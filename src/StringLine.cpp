@@ -11,13 +11,14 @@
 /**
  * 有限状态机进行去注释，但是保留相应的行数和列数
  *
- * 本状态机主要分为7个状态
- * 状态0: 扫描到第一个/或者普通字符，可以跳转 状态1 和 状态7
+ * 本状态机主要分为6个状态
+ * 状态0: 扫描到第一个/或者普通字符，可以跳转 状态1 和 状态6
  * 状态1: 扫描到第二个/, 可以跳转 状态2 和 状态四
- * 状态7: 扫描到普通字符, 可以跳转到 状态7 和 状态1 和 状态3
+ * 状态6: 扫描到普通字符, 可以跳转到 状态7 和 状态1 和 状态3
  * 状态2: 扫描到非换行符, 可以跳转到 状态2 和 状态3
  * 状态4: 扫描到非*字符, 可以跳转到 状态4 和 状态5
  * 状态5: 扫描到最后一个/，可以跳转 状态4 和 状态0
+ * 状态3: 扫描的换行符, 可以跳转 状态0 和 状态4
  * @param s 需要进行分割的文本
  * @return StringLine集合 + 错误信息列表
  */
@@ -41,7 +42,7 @@ StringLine::convertString(std::string *s) {
                 //注释如果在字符里面，就不进行跳转，当作普通字符处理
                 if (*it == '/' && !annotationInString)state = 1;
                 else {
-                    state = 7;
+                    state = 6;
                     --it;
                 }
                 break;
@@ -105,7 +106,7 @@ StringLine::convertString(std::string *s) {
                 break;
             }
                 //读取普通字符
-            case 7: {
+            case 6: {
                 if (*it == '"') annotationInString = !annotationInString;
                 if (*it == '/' && !annotationInString) {
                     state = 0;
@@ -113,7 +114,7 @@ StringLine::convertString(std::string *s) {
                 } else if (*it != '\n') {
                     sl->setLine(lineNumber);
                     sl->getText().push_back(*it);
-                    state = 7;
+                    state = 6;
                 } else {
                     state = 3;
                     --it;
