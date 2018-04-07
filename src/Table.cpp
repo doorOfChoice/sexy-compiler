@@ -4,6 +4,13 @@
 
 #include "Table.h"
 #include <fstream>
+#include <iostream>
+
+bool isKey(char ch, bool isHead = false) {
+    if (!isHead)
+        return isalpha(ch) || ch == '_' || ch == '$' || isdigit(ch);
+    return isalpha(ch) || ch == '_' || ch == '$';
+}
 
 std::set<std::string> loadMap(const std::string &fname) {
     std::fstream f;
@@ -61,10 +68,8 @@ bool Table::inDelimiter(const std::string &key) {
     return std::find(delimiters.begin(), delimiters.end(), key) != delimiters.end();
 }
 
-bool Table::inDelimiter(const char ch) {
-    std::string s;
-    s.push_back(ch);
-    return this->inDelimiter(s);
+bool Table::inOperator(const std::string &key) {
+    return std::find(operators.begin(), operators.end(), key) != operators.end();
 }
 
 void Table::loadAll() {
@@ -80,4 +85,61 @@ void Table::addToken(const Token &token) {
 void Table::addIdentifier(const std::string &key) {
     identifiers.insert({key});
 }
+
+void Table::analyseLines(std::vector<std::shared_ptr<StringLine>> lines) {
+    for (const auto &line : lines) {
+        std::string buf;
+        auto begin = line->getText().begin();
+        for (auto it = begin; it != line->getText().end(); it++) {
+            int column = it - begin + 1;
+            if (!isblank(*it)) {
+                buf.push_back(*it);
+                //判断关键字
+                if (isKey(*it, true)) {
+                    while (isKey(*(++it))) {
+                        buf.push_back(*it);
+                    }
+                    int type = inKey(buf) ? Token::KEY_WORD : Token::IDENTIFIER;
+                    addIdentifier(buf);
+                    Token t(line->getLine(), column, type, buf);
+                    addToken(t);
+                    --it;
+                //判断分隔符
+                } else if (inDelimiter(buf)) {
+                    Token t(line->getLine(), column, Token::DELIMITERS, buf);
+                    addToken(t);
+                //判断数字
+                } else if (isdigit(*it)) {
+                    while (isdigit(*(++it))) {
+                        buf.push_back(*it);
+                    }
+                    if (*it == '.' && isdigit(*(it + 1))) {
+                        buf.push_back(*it);
+                        while (isdigit(*(++it))) {
+                            buf.push_back(*it);
+                        }
+                    }
+                    --it;
+                    Token t(line->getLine(), column, Token::NUMBER, buf);
+                    addToken(t);
+                //判断运算符
+                }else if(inOperator(buf)) {
+                    while(inOperator(buf)) {
+                        buf.push_back(*(++it));
+                    }
+                    buf.pop_back();
+                    --it;
+                    Token t(line->getLine(), column, Token::OPERATOR, buf);
+                    addToken(t);
+                //判断未知字符
+                } else {
+                    Token t(line->getLine(), column, -1, buf);
+                    addToken(t);
+                }
+            }
+            buf.clear();
+        }
+    }
+}
+
 

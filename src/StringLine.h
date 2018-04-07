@@ -2,7 +2,8 @@
 #define C_STRINGLINE_H
 
 #include <string>
-#include <utility> #include <vector>
+#include <utility>
+#include <vector>
 #include <memory>
 
 class StringLine {

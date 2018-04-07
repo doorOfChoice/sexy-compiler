@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory> #include <vector>
 #include "StringLine.h"
+#include "ErrorInfoException.h"
 
 std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *s) {
     std::vector<std::shared_ptr<StringLine>> sls;
@@ -20,18 +21,21 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
          */
         if (*it == '/' && *(it + 1) == '/') {
             while (*(it + 1) != '\n')++it;
-        /**
-         * 去除/*类型的注释
-         */
+            /**
+             * 去除/*类型的注释
+             */
         } else if (*it == '/' && *(it + 1) == '*') {
-            while (*it != '*' || *(it + 1) != '/') {
+            auto start = it;
+            while (it != s->end() - 2 && (*it != '*' || *(it + 1) != '/')) {
                 if (*it == '\n')++lineNumber;
                 ++it;
             }
+            if (it == s->end() - 2)
+                throw ErrorInfoException(lineNumber, it - start + 1, "What fuck?");
             it += 1;
-        /**
-         * 偶遇换行符考虑存储行号和该行的数据
-         */
+            /**
+             * 偶遇换行符考虑存储行号和该行的数据
+             */
         } else if (*it == '\n') {
             if (!sl->getText().empty()) {
                 sls.push_back(sl);
@@ -39,11 +43,11 @@ std::vector<std::shared_ptr<StringLine>> StringLine::convertString(std::string *
                 countLine = false;
             }
             ++lineNumber;
-        /**
-         * 读取到普通字符
-         */
+            /**
+             * 读取到普通字符
+             */
         } else {
-            if(!countLine) {
+            if (!countLine) {
                 sl->setLine(lineNumber);
                 countLine = true;
             }

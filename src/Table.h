@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <set>
 #include "Token.h"
+#include "StringLine.h"
 
 class Table {
 public:
@@ -35,12 +36,17 @@ public:
 
     bool inDelimiter(const std::string &key);
 
-    bool inDelimiter(const char ch);
+    bool inOperator(const std::string &key);
 
     void addToken(const Token &token);
 
     void addIdentifier(const std::string &key);
 
+    /**
+    * 生成token表
+    * @return
+    */
+    void analyseLines(std::vector<std::shared_ptr<StringLine>>);
 
 private:
     std::set<std::string> keyWords;

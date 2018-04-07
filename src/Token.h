@@ -29,14 +29,15 @@ public:
 
     void setName(const std::string &name);
 
+    std::string to_string()const;
+
     static const int KEY_WORD = 1;
     static const int OPERATOR = 2;
     static const int DELIMITERS = 3;
     static const int IDENTIFIER = 4;
-
+    static const int NUMBER = 5;
     static std::string getTypeName(int type);
 
-    friend std::ostream &operator<< (std::ostream &, const Token &);
 private:
     int row;
     int column;

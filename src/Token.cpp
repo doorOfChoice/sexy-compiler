@@ -42,21 +42,24 @@ Token::Token(int row, int column, int type, const std::string &name) : row(row),
 
 Token::Token() = default;
 
-std::ostream &operator<<(std::ostream &os, const Token &m) {
-    os << "row: " << m.row << ", column: " << m.column << ", type: " << Token::getTypeName(m.type) << ", name: " << m.name;
-    return os;
+std::string Token::to_string()const {
+    char buf[1024];
+    sprintf(buf, "row: %d, column: %d, type: %s, name: %s", row, column, getTypeName(type).c_str(), name.c_str());
+    return std::string(buf);
 }
 
 std::string Token::getTypeName(int type) {
     switch (type) {
-        case 1:
-            return "key word";
-        case 2:
+        case KEY_WORD:
+            return "keyword";
+        case OPERATOR:
             return "operator";
-        case 3:
+        case DELIMITERS:
             return "delimiter";
-        case 4:
-            return "identifier";
+        case IDENTIFIER:
+            return "id";
+        case NUMBER:
+            return "number";
         default:
             return "unknown";
     }
