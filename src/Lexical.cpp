@@ -5,6 +5,8 @@
 #include "Lexical.h"
 #include "base/StringUtil.h"
 
+
+
 Lexical::Lexical(const Table &table) : table(table) {}
 
 void Lexical::analyseLines(std::vector<std::shared_ptr<StringLine>> lines) {
@@ -69,6 +71,22 @@ const std::vector<Token> &Lexical::getTokens() const {
 
 const std::set<std::string> &Lexical::getIdentifiers() const {
     return identifiers;
+}
+
+void Lexical::analyseNumber(std::string::iterator it) {
+
+}
+
+void Lexical::analyseIdentifier(std::string::iterator it) {
+
+}
+
+void Lexical::analyseDelimiter(std::string::iterator it) {
+
+}
+
+void Lexical::analyseOperator(std::string::iterator it) {
+
 }
 
 

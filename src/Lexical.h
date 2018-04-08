@@ -10,6 +10,7 @@
 
 class Lexical {
 public:
+    Lexical() = default;
     Lexical(const Table &table);
 
     /**
@@ -24,6 +25,11 @@ private:
     Table table;
     std::vector<Token> tokens;
     std::set<std::string> identifiers;
+
+    void analyseNumber(std::string::iterator it);
+    void analyseIdentifier(std::string::iterator it);
+    void analyseDelimiter(std::string::iterator it);
+    void analyseOperator(std::string::iterator it);
 };
 
 
