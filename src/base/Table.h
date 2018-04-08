@@ -1,6 +1,6 @@
 /**
- *  词法分析表，词法分析核心表
- *  包括加载关键字、生成Token表等方法
+ *  词法表
+ *  用来存储非动态存储的词，比如关键字、操作符、分隔符
  */
 #ifndef C_TOKENTABLE_H
 #define C_TOKENTABLE_H
@@ -28,32 +28,16 @@ public:
 
     const std::set<std::string> &getDelimiters();
 
-    const std::vector<Token> &getTokens();
-
     bool inKey(const std::string &key);
-
-//    bool inIdentifier(const std::string &key);
 
     bool inDelimiter(const std::string &key);
 
     bool inOperator(const std::string &key);
 
-    void addToken(const Token &token);
-
-    void addIdentifier(const std::string &key);
-
-    /**
-    * 生成token表
-    * @return
-    */
-    void analyseLines(std::vector<std::shared_ptr<StringLine>>);
-
 private:
     std::set<std::string> keyWords;
     std::set<std::string> operators;
     std::set<std::string> delimiters;
-    std::set<std::string> identifiers;
-    std::vector<Token> tokens;
 };
 
 

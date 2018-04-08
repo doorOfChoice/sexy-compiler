@@ -3,4 +3,4 @@ project(c__)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(c__ main.cpp src/StringLine.cpp src/StringLine.h src/Table.cpp src/Table.h src/Token.cpp src/Token.h src/ErrorInfoException.cpp src/ErrorInfoException.h src/StringUtil.cpp src/StringUtil.h)
+add_executable(c__ main.cpp src/base/StringLine.cpp src/base/StringLine.h src/base/Table.cpp src/base/Table.h src/base/Token.cpp src/base/Token.h src/base/ErrorInfoException.cpp src/base/ErrorInfoException.h src/base/StringUtil.cpp src/base/StringUtil.h src/Lexical.cpp src/Lexical.h)

@@ -2,9 +2,10 @@
 #include <fstream>
 #include <memory>
 #include<vector>
-#include "src/StringLine.h"
-#include "src/Table.h"
-#include "src/ErrorInfoException.h"
+#include "src/base/StringLine.h"
+#include "src/base/Table.h"
+#include "src/base/ErrorInfoException.h"
+#include "src/Lexical.h"
 
 using namespace std;
 
@@ -31,27 +32,30 @@ shared_ptr<string> readCode(const string &fname) {
     return s;
 }
 
-Table table;
-vector<ErrorInfoException> errorInfos;
 
-class A{
-public:int x = 100;};
 int main() {
-    try {
-        auto lines = StringLine::convertString(readCode("code.java").get());
-        for (shared_ptr<StringLine> &v:lines.first) {
-            cout << v->getLine() << ":" << v->getText() << endl;
-        }
-        table.loadAll();
-        table.analyseLines(lines.first);
-        for(const auto &v : lines.second) {
-            cout << v.what() << endl;
-        }
-        for (const auto &v : table.getTokens()) {
-            cout << v.to_string() << endl;
-        }
-    } catch (ErrorInfoException &e) {
-        errorInfos.push_back(e);
+    /**
+     * 去除注释
+     */
+    auto lines = StringLine::convertString(readCode("code.java").get());
+    for (shared_ptr<StringLine> &v:lines.first) {
+        cout << v->getLine() << ":" << v->getText() << endl;
+    }
+    /**
+     * 加载 关键字、运算符、分隔符表
+     */
+    Table table;
+    table.loadAll();
+    /**
+     * 调用词法分析器
+     */
+    Lexical lexical(table);
+    lexical.analyseLines(lines.first);
+    for (const auto &v : lines.second) {
+        cout << v.what() << endl;
+    }
+    for (const auto &v : lexical.getTokens()) {
+        cout << v.to_string() << endl;
     }
 }
 
@@ -59,4 +63,6 @@ int main() {
  * TODO:
  * 1. 需要修复cout输出不完整
  * 2. 重新定义一下各种表，只用一种int，太单调
+ * 3. 使用状态机重写词法分析器
+ * 4. 熟练掌握C++使用
  */
