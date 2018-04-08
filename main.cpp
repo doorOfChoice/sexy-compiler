@@ -2,9 +2,9 @@
 #include <fstream>
 #include <memory>
 #include<vector>
-#include "StringLine.h"
-#include "Table.h"
-#include "ErrorInfoException.h"
+#include "src/StringLine.h"
+#include "src/Table.h"
+#include "src/ErrorInfoException.h"
 
 using namespace std;
 
@@ -34,6 +34,8 @@ shared_ptr<string> readCode(const string &fname) {
 Table table;
 vector<ErrorInfoException> errorInfos;
 
+class A{
+public:int x = 100;};
 int main() {
     try {
         auto lines = StringLine::convertString(readCode("code.java").get());
@@ -42,6 +44,9 @@ int main() {
         }
         table.loadAll();
         table.analyseLines(lines.first);
+        for(const auto &v : lines.second) {
+            cout << v.what() << endl;
+        }
         for (const auto &v : table.getTokens()) {
             cout << v.to_string() << endl;
         }
