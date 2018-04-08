@@ -171,12 +171,9 @@ bool Lexical::analyseIdentifier(string::iterator &it, const Meta &m) {
             }
             case 1: {
                 if (StringUtil::isKey(*it))buf.push_back(*it);
-                else if(StringUtil::isBlank(*it)){
+                else{
                     --it;
                     state = 2;
-                }else {
-                    errors.emplace_back(m.line, m.column, "Wrong Id");
-                    return false;
                 }
                 break;
             }
