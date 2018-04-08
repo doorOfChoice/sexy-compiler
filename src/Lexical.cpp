@@ -23,9 +23,8 @@ void Lexical::analyseLines(vector<shared_ptr<StringLine>> lines) {
             else if (analyseOperator(it, Meta(lineNumber, column, end)));
             else if (analyseDelimiter(it, Meta(lineNumber, column, end)));
             else {
-                auto s = new string("Unknow Char: ");
-                s->push_back(*it);
-                errors.emplace_back(lineNumber, column, s->c_str());
+                auto s = string("Unknow Char: ") + *it;
+                errors.emplace_back(lineNumber, column, s);
                 break;
             }
         }
@@ -73,14 +72,14 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                     state = 8;
                 } else {
                     --it;
-                    errors.emplace_back(m.line, m.column, "Bad Number Character");
+                    errors.emplace_back(m.line, m.column, string("Bad Number Character: ") + *it);
                     return false;
                 }
                 break;
             }
             case 3: {
                 if (!isdigit(*it)) {
-                    errors.emplace_back(m.line, m.column, "Bad Number Character");
+                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 --it;
@@ -96,7 +95,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                     --it;
                     state = 8;
                 } else {
-                    errors.emplace_back(m.line, m.column, "Bad Number Character");
+                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 break;
@@ -109,14 +108,14 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                     --it;
                     state = 7;
                 } else {
-                    errors.emplace_back(m.line, m.column, "Bad e, we need number");
+                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 break;
             }
             case 6: {
                 if (!isdigit(*it)) {
-                    errors.emplace_back(m.line, m.column, "Bad Number Character");
+                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 --it;

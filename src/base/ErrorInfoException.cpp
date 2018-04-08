@@ -3,15 +3,18 @@
 //
 
 #include "ErrorInfoException.h"
+#include <sstream>
 
-ErrorInfoException::ErrorInfoException(int row, int column, const char *s) {
-    sprintf(summary, "row: %d, column: %d, message: %s", row, column, s);
+ErrorInfoException::ErrorInfoException(int row, int column, const std::string &s) {
+    std::ostringstream ost;
+    ost << "row: " << row << ", column: " << column << ", message: " << s << std::endl;
+    summary = ost.str();
 }
 
 ErrorInfoException::ErrorInfoException() = default;
 
 const char *ErrorInfoException::what() const noexcept {
-    return summary;
+    return summary.c_str();
 }
 
 

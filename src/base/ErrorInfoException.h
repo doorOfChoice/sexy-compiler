@@ -11,11 +11,11 @@
 
 class ErrorInfoException : public std::exception{
 public:
-    ErrorInfoException(int row, int column, const char *);
+    ErrorInfoException(int row, int column, const std::string &);
     ErrorInfoException();
     const char * what () const noexcept override;
 private:
-    char summary[200];
+    std::string summary;
 };
 
 
