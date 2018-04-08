@@ -14,6 +14,8 @@ std::string StringUtil::trim(const std::string &s) {
     str.replace(0, str.size() - 1, '\n', ' ');
     str.erase(0, str.find_first_not_of(' '));
     str.erase(str.find_last_not_of(' ') + 1, str.size());
+    str.erase(0, str.find_first_not_of('\t'));
+    str.erase(str.find_last_not_of('\t') + 1, str.size());
     return str;
 }
 

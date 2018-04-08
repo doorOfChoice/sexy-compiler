@@ -14,7 +14,7 @@ void Lexical::analyseLines(vector<shared_ptr<StringLine>> lines) {
         auto begin = line->getText().begin();
         auto end = line->getText().end();
         auto it = line->getText().begin();
-        ++lineNumber;
+        lineNumber = line->getLine();
         while (it != end) {
             int column = it - begin + 1;
             if (StringUtil::isBlank(*it))++it;
@@ -23,7 +23,9 @@ void Lexical::analyseLines(vector<shared_ptr<StringLine>> lines) {
             else if (analyseOperator(it, Meta(lineNumber, column, end)));
             else if (analyseDelimiter(it, Meta(lineNumber, column, end)));
             else {
-                errors.emplace_back(lineNumber, column, "Unknow Character");
+                auto s = new string("Unknow Char: ");
+                s->push_back(*it);
+                errors.emplace_back(lineNumber, column, s->c_str());
                 break;
             }
         }
@@ -63,6 +65,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
             }
             case 1: {
                 if (!isdigit(*it)) {
+                    --it;
                     errors.emplace_back(m.line, m.column, "Bad Number Character");
                     return false;
                 }
@@ -82,6 +85,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                     --it;
                     state = 8;
                 } else {
+                    --it;
                     errors.emplace_back(m.line, m.column, "Bad Number Character");
                     return false;
                 }

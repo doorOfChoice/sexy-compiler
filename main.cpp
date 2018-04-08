@@ -38,9 +38,9 @@ int main() {
      * 去除注释
      */
     auto lines = StringLine::convertString(readCode("code.java").get());
-    for (shared_ptr<StringLine> &v:lines.first) {
-        cout << v->getLine() << ":" << v->getText() ;
-    }
+//    for (shared_ptr<StringLine> &v:lines.first) {
+//        cout << v->getLine() << ":" << v->getText() ;
+//    }
     /**
      * 加载 关键字、运算符、分隔符表
      */

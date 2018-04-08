@@ -44,7 +44,7 @@ Token::Token() = default;
 
 std::string Token::to_string()const {
     char buf[1024];
-    sprintf(buf, "row: %d, column: %d, type: %s, name: %s", row, column, getTypeName(type).c_str(), name.c_str());
+    sprintf(buf, "(%d, %d, %s, %s)", row, column, getTypeName(type).c_str(), name.c_str());
     return std::string(buf);
 }
 
