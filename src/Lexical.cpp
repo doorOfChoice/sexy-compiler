@@ -53,24 +53,11 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (*it == '-') {
-                    buf.push_back('-');
-                    state = 1;
-                } else if (isdigit(*it)) {
+                if (isdigit(*it)) {
                     state = 2;
                     --it;
                 } else
                     return false;
-                break;
-            }
-            case 1: {
-                if (!isdigit(*it)) {
-                    --it;
-                    errors.emplace_back(m.line, m.column, "Bad Number Character");
-                    return false;
-                }
-                --it;
-                state = 2;
                 break;
             }
             case 2: {
