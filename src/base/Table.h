@@ -34,6 +34,10 @@ public:
 
     bool inOperator(const std::string &key);
 
+    bool inDelimiter(const char &ch);
+
+    bool inOperator(const char &ch);
+
 private:
     std::set<std::string> keyWords;
     std::set<std::string> operators;

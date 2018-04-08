@@ -71,6 +71,7 @@ StringLine::convertString(std::string *s) {
                 //处理已经读取了一行的情况
             case 3: {
                 if (!StringUtil::trim(sl->getText()).empty()) {
+                    sl->getText().push_back('\n');
                     sls.push_back(sl);
                 }
                 sl = std::make_shared<StringLine>(lineNumber, std::string());

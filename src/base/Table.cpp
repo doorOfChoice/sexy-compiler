@@ -66,4 +66,16 @@ void Table::loadAll() {
     loadDelimiters("delimiters.txt");
 }
 
+bool Table::inDelimiter(const char &ch) {
+    std::string s;
+    s.push_back(ch);
+    return inDelimiter(s);
+}
+
+bool Table::inOperator(const char &ch) {
+    std::string s;
+    s.push_back(ch);
+    return inOperator(s);
+}
+
 

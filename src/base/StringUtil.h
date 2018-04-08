@@ -13,6 +13,7 @@ class StringUtil {
 public:
     static std::string trim(const std::string &);
     static bool isKey(char , bool = false);
+    static bool isBlank(char);
 };
 
 

@@ -8,29 +8,50 @@
 
 #include "base/Table.h"
 
+using namespace std;
+
+struct Meta {
+    int line;
+    int column;
+    string::iterator &end;
+
+    Meta(int line, int column, string::iterator &end) : line(
+            line), column(column), end(end) {}
+};
+
 class Lexical {
 public:
     Lexical() = default;
+
     Lexical(const Table &table);
 
     /**
     * 生成token表
     * @return
     */
-    void analyseLines(std::vector<std::shared_ptr<StringLine>>);
+    void analyseLines(vector<shared_ptr<StringLine>>);
 
-    const std::vector<Token> &getTokens() const;
-    const std::set<std::string> &getIdentifiers() const;
+    const vector<Token> &getTokens() const;
+
+    const set<string> &getIdentifiers() const;
+
+    const vector<ErrorInfoException> &getErrors() const;
+
 private:
     Table table;
-    std::vector<Token> tokens;
-    std::set<std::string> identifiers;
+    vector<Token> tokens;
+    vector<ErrorInfoException> errors;
+    set<string> identifiers;
 
-    void analyseNumber(std::string::iterator it);
-    void analyseIdentifier(std::string::iterator it);
-    void analyseDelimiter(std::string::iterator it);
-    void analyseOperator(std::string::iterator it);
+    bool analyseNumber(string::iterator &it, const Meta &m);
+
+    bool analyseIdentifier(string::iterator &it, const Meta &m);
+
+    bool analyseDelimiter(string::iterator &it, const Meta &m);
+
+    bool analyseOperator(string::iterator &it, const Meta &m);
+
+    bool isSuffix(char ch);
 };
-
 
 #endif //C_LEXICAL_H

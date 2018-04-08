@@ -27,3 +27,7 @@ bool StringUtil::isKey(char ch, bool isHead) {
     bool head = isalpha(ch) || ch == '_' || ch == '$';
     return isHead ? head : head || isdigit(ch);
 }
+
+bool StringUtil::isBlank(char ch) {
+    return isblank(ch) || ch == '\n';
+}

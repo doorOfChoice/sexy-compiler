@@ -39,7 +39,7 @@ int main() {
      */
     auto lines = StringLine::convertString(readCode("code.java").get());
     for (shared_ptr<StringLine> &v:lines.first) {
-        cout << v->getLine() << ":" << v->getText() << endl;
+        cout << v->getLine() << ":" << v->getText() ;
     }
     /**
      * 加载 关键字、运算符、分隔符表
@@ -51,9 +51,11 @@ int main() {
      */
     Lexical lexical(table);
     lexical.analyseLines(lines.first);
-    for (const auto &v : lines.second) {
+    cout << "~~~~~~~~errors" << endl;
+    for (const auto &v : lexical.getErrors()) {
         cout << v.what() << endl;
     }
+    cout << "~~~~~~~~end" << endl;
     for (const auto &v : lexical.getTokens()) {
         cout << v.to_string() << endl;
     }
@@ -65,4 +67,5 @@ int main() {
  * 2. 重新定义一下各种表，只用一种int，太单调
  * 3. 使用状态机重写词法分析器
  * 4. 熟练掌握C++使用
+ * 5. 遇到异常不进行判断
  */
