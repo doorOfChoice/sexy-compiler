@@ -72,7 +72,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                 } else if (*it == 'e') {
                     buf.push_back(*it);
                     state = 5;
-                } else if (isSuffix(*it)) {
+                } else if (!isalpha(*it)) {
                     --it;
                     state = 8;
                 } else {
@@ -100,7 +100,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                 } else if (*it == 'e') {
                     buf.push_back(*it);
                     state = 5;
-                } else if (isSuffix(*it)) {
+                } else if (!isalpha(*it)) {
                     --it;
                     state = 8;
                 } else {
@@ -130,7 +130,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
             }
             case 7: {
                 if (isdigit(*it)) buf.push_back(*it);
-                else if (isSuffix(*it)) {
+                else if (!isalpha(*it)) {
                     --it;
                     state = 8;
                 } else
@@ -139,7 +139,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
             }
                 //处理浮点数符号f
             case 9: {
-                if (isSuffix(*it)) {
+                if (!isalpha(*it)) {
                     --it;
                     state = 8;
                 } else
@@ -147,7 +147,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                 break;
             }
             case 10: {
-                if (isSuffix(*it)) {
+                if (!isalpha(*it)) {
                     --it;
                     state = 8;
                 } else
