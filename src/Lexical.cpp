@@ -18,14 +18,13 @@ void Lexical::analyseLines(vector<shared_ptr<StringLine>> lines) {
         while (it != end) {
             int column = it - begin + 1;
             if (StringUtil::isBlank(*it))++it;
+            else if (analyseDelimiter(it, Meta(lineNumber, column, end)));
             else if (analyseIdentifier(it, Meta(lineNumber, column, end)));
             else if (analyseNumber(it, Meta(lineNumber, column, end)));
             else if (analyseOperator(it, Meta(lineNumber, column, end)));
-            else if (analyseDelimiter(it, Meta(lineNumber, column, end)));
             else {
-                auto s = string("Unknow Char: ") + *it;
-                errors.emplace_back(lineNumber, column, s);
-                break;
+                errors.emplace_back(lineNumber, it - begin + 1, string("Unknow Char: ") + *it);
+                return;
             }
         }
 
@@ -41,17 +40,17 @@ const set<string> &Lexical::getIdentifiers() const {
 }
 
 /**
- * 分析科学记数法
+ * 分析科学记数法1.2e-100
  * @param it
  * @param m
  * @return
  */
 bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
-    int state = 0;
+    int state = 1;
     string buf;
     while (it != m.end) {
         switch (state) {
-            case 0: {
+            case 1: {
                 if (isdigit(*it)) {
                     state = 2;
                     --it;
@@ -61,25 +60,29 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
             }
             case 2: {
                 if (isdigit(*it))buf.push_back(*it);
-                else if (*it == '.') {
-                    buf.push_back('.');
+                else if (tolower(*it) == 'f') {
+                    buf.push_back(*it);
+                    state = 9;
+                }else if(tolower(*it) == 'l') {
+                    buf.push_back(*it);
+                    state = 10;
+                } else if (*it == '.') {
+                    buf.push_back(*it);
                     state = 3;
                 } else if (*it == 'e') {
-                    buf.push_back('e');
+                    buf.push_back(*it);
                     state = 5;
                 } else if (isSuffix(*it)) {
                     --it;
                     state = 8;
                 } else {
                     --it;
-                    errors.emplace_back(m.line, m.column, string("Bad Number Character: ") + *it);
                     return false;
                 }
                 break;
             }
             case 3: {
                 if (!isdigit(*it)) {
-                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 --it;
@@ -88,34 +91,37 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
             }
             case 4: {
                 if (isdigit(*it))buf.push_back(*it);
-                else if (*it == 'e') {
-                    buf.push_back('e');
+                else if (tolower(*it) == 'f') {
+                    buf.push_back(*it);
+                    state = 9;
+                } else if(tolower(*it) == 'l') {
+                    buf.push_back(*it);
+                    state = 10;
+                } else if (*it == 'e') {
+                    buf.push_back(*it);
                     state = 5;
                 } else if (isSuffix(*it)) {
                     --it;
                     state = 8;
                 } else {
-                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 break;
             }
             case 5: {
                 if (*it == '-') {
-                    buf.push_back('-');
+                    buf.push_back(*it);
                     state = 6;
                 } else if (isdigit(*it)) {
                     --it;
                     state = 7;
                 } else {
-                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 break;
             }
             case 6: {
                 if (!isdigit(*it)) {
-                    errors.emplace_back(m.line, m.column,  string("Bad Number Character: ") + *it);
                     return false;
                 }
                 --it;
@@ -124,10 +130,28 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
             }
             case 7: {
                 if (isdigit(*it)) buf.push_back(*it);
-                else {
+                else if (isSuffix(*it)) {
                     --it;
                     state = 8;
-                }
+                } else
+                    return false;
+                break;
+            }
+                //处理浮点数符号f
+            case 9: {
+                if (isSuffix(*it)) {
+                    --it;
+                    state = 8;
+                } else
+                    return false;
+                break;
+            }
+            case 10: {
+                if (isSuffix(*it)) {
+                    --it;
+                    state = 8;
+                } else
+                    return false;
                 break;
             }
             case 8: {
@@ -161,7 +185,7 @@ bool Lexical::analyseIdentifier(string::iterator &it, const Meta &m) {
             }
             case 1: {
                 if (StringUtil::isKey(*it))buf.push_back(*it);
-                else{
+                else {
                     --it;
                     state = 2;
                 }
