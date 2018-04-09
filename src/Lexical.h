@@ -29,7 +29,7 @@ public:
     * 生成token表
     * @return
     */
-    void analyseLines(vector<shared_ptr<StringLine>>);
+    void analyse(vector<shared_ptr<StringLine>>);
 
     const vector<Token> &getTokens() const;
 
@@ -50,8 +50,6 @@ private:
     bool analyseDelimiter(string::iterator &it, const Meta &m);
 
     bool analyseOperator(string::iterator &it, const Meta &m);
-
-    bool isSuffix(char ch);
 };
 
 #endif //C_LEXICAL_H

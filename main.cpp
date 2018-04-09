@@ -50,7 +50,7 @@ int main() {
      * 调用词法分析器
      */
     Lexical lexical(table);
-    lexical.analyseLines(lines.first);
+    lexical.analyse(lines.first);
     cout << "~~~~~~~~errors" << endl;
     for (const auto &v : lexical.getErrors()) {
         cout << v.what() << endl;

@@ -8,7 +8,19 @@
 
 Lexical::Lexical(const Table &table) : table(table) {}
 
-void Lexical::analyseLines(vector<shared_ptr<StringLine>> lines) {
+const vector<ErrorInfoException> &Lexical::getErrors() const {
+    return errors;
+}
+
+const vector<Token> &Lexical::getTokens() const {
+    return tokens;
+}
+
+const set<string> &Lexical::getIdentifiers() const {
+    return identifiers;
+}
+
+void Lexical::analyse(vector<shared_ptr<StringLine>> lines) {
     int lineNumber = 0;
     for (const auto &line : lines) {
         auto begin = line->getText().begin();
@@ -29,14 +41,6 @@ void Lexical::analyseLines(vector<shared_ptr<StringLine>> lines) {
         }
 
     }
-}
-
-const vector<Token> &Lexical::getTokens() const {
-    return tokens;
-}
-
-const set<string> &Lexical::getIdentifiers() const {
-    return identifiers;
 }
 
 /**
@@ -75,10 +79,9 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                 } else if (!isalpha(*it)) {
                     --it;
                     state = 8;
-                } else {
-                    --it;
+                } else
                     return false;
-                }
+
                 break;
             }
             case 3: {
@@ -103,21 +106,20 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                 } else if (!isalpha(*it)) {
                     --it;
                     state = 8;
-                } else {
+                } else
                     return false;
-                }
+
                 break;
             }
             case 5: {
-                if (*it == '-') {
+                if (*it == '-' || *it == '+') {
                     buf.push_back(*it);
                     state = 6;
                 } else if (isdigit(*it)) {
                     --it;
                     state = 7;
-                } else {
+                } else
                     return false;
-                }
                 break;
             }
             case 6: {
@@ -257,14 +259,5 @@ bool Lexical::analyseOperator(string::iterator &it, const Meta &m) {
     }
     return false;
 }
-
-const vector<ErrorInfoException> &Lexical::getErrors() const {
-    return errors;
-}
-
-bool Lexical::isSuffix(char ch) {
-    return table.inOperator(ch) || table.inDelimiter(ch) || StringUtil::isBlank(ch);
-}
-
 
 
