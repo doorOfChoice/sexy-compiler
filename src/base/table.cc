@@ -2,8 +2,8 @@
 // Created by dawndevil on 2018/4/6.
 //
 
-#include "Table.h"
-#include "StringUtil.h"
+#include "table.h"
+#include "string_util.h"
 #include <fstream>
 #include <iostream>
 
@@ -24,58 +24,58 @@ std::set<std::string> load(const std::string &fname) {
     return std::set<std::string>();
 }
 
-void Table::loadKeyWords(const std::string &fname) {
+void Table::load_keywords(const std::string &fname) {
     this->keyWords = load(fname);
 }
 
-void Table::loadOperators(const std::string &fname) {
+void Table::load_operators(const std::string &fname) {
     this->operators = load(fname);
 }
 
-void Table::loadDelimiters(const std::string &fname) {
+void Table::load_delimiters(const std::string &fname) {
     this->delimiters = load(fname);
 }
 
-const std::set<std::string> &Table::getKeyWords() {
+const std::set<std::string> &Table::get_keywords() {
     return keyWords;
 }
 
-const std::set<std::string> &Table::getOperators() {
+const std::set<std::string> &Table::get_operators() {
     return operators;
 }
 
-const std::set<std::string> &Table::getDelimiters() {
+const std::set<std::string> &Table::get_delimiters() {
     return delimiters;
 }
 
-bool Table::inKey(const std::string &key) {
+bool Table::in_key(const std::string &key) {
     return std::find(keyWords.begin(), keyWords.end(), key) != keyWords.end();
 }
 
-bool Table::inDelimiter(const std::string &key) {
+bool Table::in_delimiter(const std::string &key) {
     return std::find(delimiters.begin(), delimiters.end(), key) != delimiters.end();
 }
 
-bool Table::inOperator(const std::string &key) {
+bool Table::in_operator(const std::string &key) {
     return std::find(operators.begin(), operators.end(), key) != operators.end();
 }
 
-void Table::loadAll() {
-    loadKeyWords("keywords.txt");
-    loadOperators("operators.txt");
-    loadDelimiters("delimiters.txt");
+void Table::load_all() {
+    load_keywords("keywords.txt");
+    load_operators("operators.txt");
+    load_delimiters("delimiters.txt");
 }
 
-bool Table::inDelimiter(const char &ch) {
+bool Table::in_delimiter(const char &ch) {
     std::string s;
     s.push_back(ch);
-    return inDelimiter(s);
+    return in_delimiter(s);
 }
 
-bool Table::inOperator(const char &ch) {
+bool Table::in_operator(const char &ch) {
     std::string s;
     s.push_back(ch);
-    return inOperator(s);
+    return in_operator(s);
 }
 
 

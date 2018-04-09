@@ -4,9 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <memory>
-#include "StringLine.h"
-#include "ErrorInfoException.h"
-#include "StringUtil.h"
+#include "string_line.h"
+#include "error_info_exception.h"
+#include "string_util.h"
 
 /**
  * 有限状态机进行去注释，但是保留相应的行数和列数
@@ -22,10 +22,10 @@
  * @param s 需要进行分割的文本
  * @return StringLine集合 + 错误信息列表
  */
-std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>>
-StringLine::convertString(std::string *s) {
+std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<error_info_exception>>
+StringLine::convert_string(std::string *s) {
     std::vector<std::shared_ptr<StringLine>> sls;
-    std::vector<ErrorInfoException> errors;
+    std::vector<error_info_exception> errors;
     int lineNumber = 1;
     auto it = s->begin();
     //StringLine
@@ -63,15 +63,15 @@ StringLine::convertString(std::string *s) {
                     state = 3;
                     --it;
                 } else {
-                    sl->getText().push_back(' ');
+                    sl->get_text().push_back(' ');
                     state = 2;
                 }
                 break;
             }
                 //处理已经读取了一行的情况
             case 3: {
-                if (!StringUtil::trim(sl->getText()).empty()) {
-                    sl->getText().push_back('\n');
+                if (!StringUtil::trim(sl->get_text()).empty()) {
+                    sl->get_text().push_back('\n');
                     sls.push_back(sl);
                 }
                 sl = std::make_shared<StringLine>(lineNumber, std::string());
@@ -88,7 +88,7 @@ StringLine::convertString(std::string *s) {
                         state = 3;
                         --it;
                     } else {
-                        sl->getText().push_back(' ');
+                        sl->get_text().push_back(' ');
                         state = 4;
                     }
                 }
@@ -97,7 +97,7 @@ StringLine::convertString(std::string *s) {
                 // 判断*后面是否是/
             case 5: {
                 if (*it == '/') {
-                    sl->getText().append("    ");
+                    sl->get_text().append("    ");
                     isAnnotation = false;
                     state = 0;
                 } else {
@@ -113,8 +113,8 @@ StringLine::convertString(std::string *s) {
                     state = 0;
                     --it;
                 } else if (*it != '\n') {
-                    sl->setLine(lineNumber);
-                    sl->getText().push_back(*it);
+                    sl->set_line(lineNumber);
+                    sl->get_text().push_back(*it);
                     state = 6;
                 } else {
                     state = 3;

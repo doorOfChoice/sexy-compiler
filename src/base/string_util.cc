@@ -2,7 +2,7 @@
 // Created by dawndevil on 2018/4/7.
 //
 
-#include "StringUtil.h"
+#include "string_util.h"
 
 /**
  * 去除包含\n在内的Left AND Right 空白字符
@@ -25,11 +25,11 @@ std::string StringUtil::trim(const std::string &s) {
  * @param isHead
  * @return
  */
-bool StringUtil::isKey(char ch, bool isHead) {
+bool StringUtil::is_key(char ch, bool isHead) {
     bool head = isalpha(ch) || ch == '_' || ch == '$';
     return isHead ? head : head || isdigit(ch);
 }
 
-bool StringUtil::isBlank(char ch) {
+bool StringUtil::is_blank(char ch) {
     return isblank(ch) || ch == '\n';
 }

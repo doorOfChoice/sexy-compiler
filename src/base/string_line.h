@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 #include <memory>
-#include "ErrorInfoException.h"
+#include "error_info_exception.h"
 
 class StringLine {
 public:
@@ -19,19 +19,19 @@ public:
 
     ~StringLine() = default;
 
-    int getLine() { return line; }
+    int get_line() { return line; }
 
-    void setLine(int line) { this->line = line; }
+    void set_line(int line) { this->line = line; }
 
-    std::string &getText() { return text; }
+    std::string &get_text() { return text; }
 
-    void setText(std::string text) { this->text = std::move(text); }
+    void set_text(std::string text) { this->text = std::move(text); }
 
     /**
      * 转换字符串为StringLine对象，便于之后换取行数和列数
      * @return
      */
-    static std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>> convertString(std::string *);
+    static std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<error_info_exception>> convert_string(std::string *);
 
 private:
     //行数

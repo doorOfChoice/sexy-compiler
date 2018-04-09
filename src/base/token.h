@@ -9,27 +9,18 @@
 
 class Token {
 public:
+    int row;
+    int column;
+    int type;
+    std::string name;
+
     Token(int row, int column, int type, const std::string &name);
 
     Token();
 
-    int getRow() const;
+    std::string to_string() const;
 
-    void setRow(int row);
-
-    int getColumn() const;
-
-    void setColumn(int column);
-
-    int getType() const;
-
-    void setType(int type);
-
-    const std::string &getName() const;
-
-    void setName(const std::string &name);
-
-    std::string to_string()const;
+    static std::string get_typename(int type);
 
     static const int KEY_WORD = 1;
     static const int OPERATOR = 2;
@@ -37,15 +28,9 @@ public:
     static const int IDENTIFIER = 4;
     static const int NUMBER = 5;
     static const int STRING = 6;
+
     static const int CHAR = 7;
 
-    static std::string getTypeName(int type);
-
-private:
-    int row;
-    int column;
-    int type;
-    std::string name;
 };
 
 

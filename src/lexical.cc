@@ -1,42 +1,41 @@
-//
-// Created by dawndevil on 2018/4/8.
-//
-
 #include <iostream>
-#include "Lexical.h"
-#include "base/StringUtil.h"
+#include "lexical.h"
+#include "base/string_util.h"
 
-Lexical::Lexical(const Table &table) : table(table) {}
+lexical::lexical(const Table &table) : table(table) {}
 
-const vector<ErrorInfoException> &Lexical::getErrors() const {
+const vector<error_info_exception> &lexical::get_errors() const {
     return errors;
 }
 
-const vector<Token> &Lexical::getTokens() const {
+const vector<Token> &lexical::get_tokens() const {
     return tokens;
 }
 
-const set<string> &Lexical::getIdentifiers() const {
+const set<string> &lexical::get_identifiers() const {
     return identifiers;
 }
 
-void Lexical::analyse(vector<shared_ptr<StringLine>> lines) {
-    int lineNumber = 0;
+/**
+ * 词法分析的入口
+ * @param lines 需要分析的行段
+ */
+void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
     for (const auto &line : lines) {
-        auto begin = line->getText().begin();
-        auto end = line->getText().end();
-        auto it = line->getText().begin();
-        lineNumber = line->getLine();
+        auto begin = line->get_text().begin();
+        auto end = line->get_text().end();
+        auto it = line->get_text().begin();
+        int lineNumber = line->get_line();
         while (it != end) {
             int column = it - begin + 1;
             Meta meta = Meta(lineNumber, column, end);
-            if (StringUtil::isBlank(*it))++it;
-            else if (analyseDelimiter(it, meta));
-            else if (analyseIdentifier(it, meta));
-            else if (analyseNumber(it, meta));
-            else if (analyseOperator(it, meta));
-            else if (analyseChar(it, meta));
-            else if (analyseString(it, meta));
+            if (StringUtil::is_blank(*it))++it;
+            else if (analyse_delimiter(it, meta));
+            else if (analyse_identifier(it, meta));
+            else if (analyse_number(it, meta));
+            else if (analyse_operator(it, meta));
+            else if (analyse_char(it, meta));
+            else if (analyse_string(it, meta));
             else {
                 errors.emplace_back(lineNumber, it - begin + 1, string("Unknow Char: ") + *it);
                 return;
@@ -51,7 +50,7 @@ void Lexical::analyse(vector<shared_ptr<StringLine>> lines) {
  * @param m
  * @return
  */
-bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
+bool lexical::analyse_number(string::iterator &it, const Meta &m) {
     int state = 1;
     string buf;
     while (it != m.end) {
@@ -174,20 +173,20 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool Lexical::analyseIdentifier(string::iterator &it, const Meta &m) {
+bool lexical::analyse_identifier(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (!StringUtil::isKey(*it, true))
+                if (!StringUtil::is_key(*it, true))
                     return false;
                 state = 1;
                 --it;
                 break;
             }
             case 1: {
-                if (StringUtil::isKey(*it))buf.push_back(*it);
+                if (StringUtil::is_key(*it))buf.push_back(*it);
                 else {
                     --it;
                     state = 2;
@@ -195,7 +194,7 @@ bool Lexical::analyseIdentifier(string::iterator &it, const Meta &m) {
                 break;
             }
             case 2: {
-                Token t(m.line, m.column, table.inKey(buf) ? Token::KEY_WORD : Token::IDENTIFIER, buf);
+                Token t(m.line, m.column, table.in_key(buf) ? Token::KEY_WORD : Token::IDENTIFIER, buf);
                 tokens.push_back(t);
                 return true;
             }
@@ -211,10 +210,10 @@ bool Lexical::analyseIdentifier(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool Lexical::analyseDelimiter(string::iterator &it, const Meta &m) {
+bool lexical::analyse_delimiter(string::iterator &it, const Meta &m) {
     string buf;
     buf.push_back(*it);
-    if (table.inDelimiter(buf)) {
+    if (table.in_delimiter(buf)) {
         Token t(m.line, m.column, Token::DELIMITERS, buf);
         tokens.push_back(t);
         ++it;
@@ -229,21 +228,21 @@ bool Lexical::analyseDelimiter(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool Lexical::analyseOperator(string::iterator &it, const Meta &m) {
+bool lexical::analyse_operator(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     buf.push_back(*it);
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (!table.inOperator(buf))
+                if (!table.in_operator(buf))
                     return false;
                 state = 1;
                 break;
             }
             case 1: {
                 buf.push_back(*it);
-                if (!table.inOperator(buf)) {
+                if (!table.in_operator(buf)) {
                     state = 2;
                     --it;
                     buf.pop_back();
@@ -261,7 +260,7 @@ bool Lexical::analyseOperator(string::iterator &it, const Meta &m) {
     return false;
 }
 
-bool Lexical::analyseChar(string::iterator &it, const Meta &m) {
+bool lexical::analyse_char(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     auto isSpecial = [](char ch) -> bool { return ch == '\\' || ch == '"' || ch == '\''; };
@@ -319,7 +318,7 @@ bool Lexical::analyseChar(string::iterator &it, const Meta &m) {
     return false;
 }
 
-bool Lexical::analyseString(string::iterator &it, const Meta &m) {
+bool lexical::analyse_string(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
 

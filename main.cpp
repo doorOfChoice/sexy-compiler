@@ -2,10 +2,10 @@
 #include <fstream>
 #include <memory>
 #include<vector>
-#include "src/base/StringLine.h"
-#include "src/base/Table.h"
-#include "src/base/ErrorInfoException.h"
-#include "src/Lexical.h"
+#include "src/base/string_line.h"
+#include "src/base/table.h"
+#include "src/base/error_info_exception.h"
+#include "src/lexical.h"
 
 using namespace std;
 
@@ -37,7 +37,7 @@ int main() {
     /**
      * 去除注释
      */
-    auto lines = StringLine::convertString(readCode("code.java").get());
+    auto lines = StringLine::convert_string(readCode("code.java").get());
 //    for (shared_ptr<StringLine> &v:lines.first) {
 //        cout << v->getLine() << ":" << v->getText() ;
 //    }
@@ -45,18 +45,18 @@ int main() {
      * 加载 关键字、运算符、分隔符表
      */
     Table table;
-    table.loadAll();
+    table.load_all();
     /**
      * 调用词法分析器
      */
-    Lexical lexical(table);
+    lexical lexical(table);
     lexical.analyse(lines.first);
     cout << "~~~~~~~~errors" << endl;
-    for (const auto &v : lexical.getErrors()) {
+    for (const auto &v : lexical.get_errors()) {
         cout << v.what() << endl;
     }
     cout << "~~~~~~~~end" << endl;
-    for (const auto &v : lexical.getTokens()) {
+    for (const auto &v : lexical.get_tokens()) {
         cout << v.to_string() << endl;
     }
 }
