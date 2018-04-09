@@ -68,15 +68,15 @@ bool Table::in_operator(const std::string &key) {
     return std::find(operators.begin(), operators.end(), key) != operators.end();
 }
 
+bool Table::in_escape_chars(const char &ch) {
+    return std::find(escape_chars.begin(), escape_chars.end(), std::string() + ch) != escape_chars.end();
+}
+
 void Table::load_all() {
     load_keywords("keywords.txt");
     load_operators("operators.txt");
     load_delimiters("delimiters.txt");
     load_escape_chars("escape_characters.txt");
-}
-
-bool Table::in_escape_chars(const char &ch) {
-    return false;
 }
 
 bool Table::in_delimiter(const char &ch) {

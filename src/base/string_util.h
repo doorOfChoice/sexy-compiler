@@ -9,12 +9,31 @@
 
 #include <string>
 
-class StringUtil {
-public:
-    static std::string trim(const std::string &);
-    static bool is_key(char , bool = false);
-    static bool is_blank(char);
-};
+namespace stil {
+    /**
+     * 去除两边的空白符号，包括\t和\n
+     * @return
+     */
+    std::string trim(const std::string &);
+
+    /**
+     * 判断是否是关键字
+     * @return
+     */
+    bool is_key(const char &, bool = false);
+
+    /**
+     * 判断是否是空白，包括\n
+     * @return
+     */
+    bool is_blank(const char &);
+
+    /**
+     * 判断是否是八进制
+     * @return
+     */
+    bool is_octal(const char &);
+}
 
 
 #endif //C_STRINGUTIL_H

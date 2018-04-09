@@ -70,7 +70,7 @@ StringLine::convert_string(std::string *s) {
             }
                 //处理已经读取了一行的情况
             case 3: {
-                if (!StringUtil::trim(sl->get_text()).empty()) {
+                if (!stil::trim(sl->get_text()).empty()) {
                     sl->get_text().push_back('\n');
                     sls.push_back(sl);
                 }

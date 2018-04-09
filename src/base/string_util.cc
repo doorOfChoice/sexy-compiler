@@ -9,7 +9,7 @@
  * @param s
  * @return
  */
-std::string StringUtil::trim(const std::string &s) {
+std::string stil::trim(const std::string &s) {
     std::string str = s;
     str.replace(0, str.size() - 1, '\n', ' ');
     str.erase(0, str.find_first_not_of(' '));
@@ -25,11 +25,15 @@ std::string StringUtil::trim(const std::string &s) {
  * @param isHead
  * @return
  */
-bool StringUtil::is_key(char ch, bool isHead) {
+bool stil::is_key(const char &ch, bool isHead) {
     bool head = isalpha(ch) || ch == '_' || ch == '$';
     return isHead ? head : head || isdigit(ch);
 }
 
-bool StringUtil::is_blank(char ch) {
+bool stil::is_blank(const char &ch) {
     return isblank(ch) || ch == '\n';
+}
+
+bool stil::is_octal(const char &ch) {
+    return ch >= '0' && ch < '8';
 }

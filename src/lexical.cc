@@ -29,7 +29,7 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
         while (it != end) {
             int column = it - begin + 1;
             Meta meta = Meta(lineNumber, column, end);
-            if (StringUtil::is_blank(*it))++it;
+            if (stil::is_blank(*it))++it;
             else if (analyse_delimiter(it, meta));
             else if (analyse_identifier(it, meta));
             else if (analyse_number(it, meta));
@@ -97,7 +97,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 else if (tolower(*it) == 'f') {
                     buf.push_back(*it);
                     state = 9;
-                }else if (*it == 'e') {
+                } else if (*it == 'e') {
                     buf.push_back(*it);
                     state = 5;
                 } else if (!isalpha(*it)) {
@@ -176,14 +176,14 @@ bool lexical::analyse_identifier(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (!StringUtil::is_key(*it, true))
+                if (!stil::is_key(*it, true))
                     return false;
                 state = 1;
                 --it;
                 break;
             }
             case 1: {
-                if (StringUtil::is_key(*it))buf.push_back(*it);
+                if (stil::is_key(*it))buf.push_back(*it);
                 else {
                     --it;
                     state = 2;
@@ -266,8 +266,8 @@ bool lexical::analyse_operator(string::iterator &it, const Meta &m) {
 bool lexical::analyse_char(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
-    auto isSpecial = [](char ch) -> bool { return ch == '\\' || ch == '"' || ch == '\''; };
     int countU = 0;
+    int countO = 0;
     while (it != m.end) {
         switch (state) {
             case 0: {
@@ -290,17 +290,16 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
                 state = 3;
                 break;
             }
-            case 3: {
-                Token t(m.line, m.column, Token::CHAR, buf);
-                tokens.push_back(t);
-                return true;
-            }
             case 4: {
                 buf.push_back(*it);
-                if (isSpecial(*it)) {
+                if (table.in_escape_chars(*it)) {
                     state = 2;
                 } else if (*it == 'u') {
                     state = 5;
+                } else if (stil::is_octal(*it)) {
+                    state = 6;
+                    --it;
+                    buf.pop_back();
                 } else {
                     return false;
                 }
@@ -308,12 +307,28 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
             }
             case 5: {
                 if (countU++ < 4) {
-                    if (isdigit(*it))buf.push_back(*it);
+                    if (isxdigit(*it))buf.push_back(*it);
                     else return false;
                 } else {
                     --it;
                     state = 2;
                 }
+                break;
+            }
+            case 6: {
+                if (countO++ < 3) {
+                    if (stil::is_octal(*it))buf.push_back(*it);
+                    else return false;
+                } else {
+                    --it;
+                    state = 2;
+                }
+                break;
+            }
+            case 3: {
+                Token t(m.line, m.column, Token::CHAR, buf);
+                tokens.push_back(t);
+                return true;
             }
         }
         ++it;
@@ -332,8 +347,8 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
     string buf;
 
     //判断是否是需要转义的字符
-    auto isSpecial = [](char ch) -> bool { return ch == '\\' || ch == '"' || ch == '\''; };
     int countU = 0;
+    int countO = 0;
     while (it != m.end) {
         switch (state) {
             case 0: {
@@ -347,7 +362,7 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
                     state = 2;
                     buf.push_back(*it);
                 } else if (*it == '"')
-                    state = 4;
+                    state = 5;
                 else
                     buf.push_back(*it);
 
@@ -355,17 +370,21 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
             }
             case 2: {
                 buf.push_back(*it);
-                if (isSpecial(*it)) {
+                if (table.in_escape_chars(*it)) {
                     state = 1;
                 } else if (*it == 'u') {
                     state = 3;
+                } else if (stil::is_octal(*it)) {
+                    --it;
+                    buf.pop_back();
+                    state = 4;
                 } else
                     return false;
                 break;
             }
             case 3: {
                 if (countU++ < 4) {
-                    if (isdigit(*it))buf.push_back(*it);
+                    if (isxdigit(*it))buf.push_back(*it);
                     else return false;
                 } else {
                     countU = 0;
@@ -375,6 +394,17 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
                 break;
             }
             case 4: {
+                if (countO++ < 3) {
+                    if (stil::is_octal(*it))buf.push_back(*it);
+                    else return false;
+                } else {
+                    --it;
+                    countO = 0;
+                    state = 1;
+                }
+                break;
+            }
+            case 5: {
                 Token t(m.line, m.column, Token::STRING, buf);
                 tokens.push_back(t);
                 return true;
