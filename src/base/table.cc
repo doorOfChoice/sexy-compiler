@@ -28,6 +28,10 @@ void Table::load_keywords(const std::string &fname) {
     this->keyWords = load(fname);
 }
 
+void Table::load_escape_chars(const std::string &fname) {
+    this->escape_chars = load(fname);
+}
+
 void Table::load_operators(const std::string &fname) {
     this->operators = load(fname);
 }
@@ -42,6 +46,10 @@ const std::set<std::string> &Table::get_keywords() {
 
 const std::set<std::string> &Table::get_operators() {
     return operators;
+}
+
+const std::set<std::string> &Table::get_escape_chars() {
+    return escape_chars;
 }
 
 const std::set<std::string> &Table::get_delimiters() {
@@ -64,6 +72,11 @@ void Table::load_all() {
     load_keywords("keywords.txt");
     load_operators("operators.txt");
     load_delimiters("delimiters.txt");
+    load_escape_chars("escape_characters.txt");
+}
+
+bool Table::in_escape_chars(const char &ch) {
+    return false;
 }
 
 bool Table::in_delimiter(const char &ch) {

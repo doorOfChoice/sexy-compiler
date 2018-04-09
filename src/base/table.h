@@ -20,6 +20,8 @@ public:
 
     void load_delimiters(const std::string &fname);
 
+    void load_escape_chars(const std::string &fname);
+
     void load_all();
 
     const std::set<std::string> &get_keywords();
@@ -27,6 +29,8 @@ public:
     const std::set<std::string> &get_operators();
 
     const std::set<std::string> &get_delimiters();
+
+    const std::set<std::string> &get_escape_chars();
 
     bool in_key(const std::string &key);
 
@@ -38,10 +42,12 @@ public:
 
     bool in_operator(const char &ch);
 
+    bool in_escape_chars(const char &ch);
 private:
     std::set<std::string> keyWords;
     std::set<std::string> operators;
     std::set<std::string> delimiters;
+    std::set<std::string> escape_chars;
 };
 
 
