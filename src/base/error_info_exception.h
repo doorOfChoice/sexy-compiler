@@ -9,10 +9,10 @@
 #include <string>
 #include <exception>
 
-class error_info_exception : public std::exception{
+class ErrorInfoException : public std::exception{
 public:
-    error_info_exception(int row, int column, const std::string &);
-    error_info_exception();
+    ErrorInfoException(int row, int column, const std::string &);
+    ErrorInfoException();
     const char * what () const noexcept override;
 private:
     std::string summary;

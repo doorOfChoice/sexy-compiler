@@ -35,12 +35,12 @@ public:
 
     const set<string> &get_identifiers() const;
 
-    const vector<error_info_exception> &get_errors() const;
+    const vector<ErrorInfoException> &get_errors() const;
 
 private:
     Table table;
     vector<Token> tokens;
-    vector<error_info_exception> errors;
+    vector<ErrorInfoException> errors;
     set<string> identifiers;
 
     bool analyse_number(string::iterator &it, const Meta &m);

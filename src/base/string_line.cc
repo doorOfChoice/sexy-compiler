@@ -22,10 +22,10 @@
  * @param s 需要进行分割的文本
  * @return StringLine集合 + 错误信息列表
  */
-std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<error_info_exception>>
+std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>>
 StringLine::convert_string(std::string *s) {
     std::vector<std::shared_ptr<StringLine>> sls;
-    std::vector<error_info_exception> errors;
+    std::vector<ErrorInfoException> errors;
     int lineNumber = 1;
     auto it = s->begin();
     //StringLine

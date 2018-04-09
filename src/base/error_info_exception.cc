@@ -5,15 +5,15 @@
 #include "error_info_exception.h"
 #include <sstream>
 
-error_info_exception::error_info_exception(int row, int column, const std::string &s) {
+ErrorInfoException::ErrorInfoException(int row, int column, const std::string &s) {
     std::ostringstream ost;
     ost << "row: " << row << ", column: " << column << ", message: " << s << std::endl;
     summary = ost.str();
 }
 
-error_info_exception::error_info_exception() = default;
+ErrorInfoException::ErrorInfoException() = default;
 
-const char *error_info_exception::what() const noexcept {
+const char *ErrorInfoException::what() const noexcept {
     return summary.c_str();
 }
 

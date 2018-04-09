@@ -4,7 +4,7 @@
 
 lexical::lexical(const Table &table) : table(table) {}
 
-const vector<error_info_exception> &lexical::get_errors() const {
+const vector<ErrorInfoException> &lexical::get_errors() const {
     return errors;
 }
 
