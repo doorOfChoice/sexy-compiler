@@ -21,15 +21,15 @@
 
 **状态图**
 
-[去除注释](resource/erase_annotation.png)
+[去除注释](./resource/erase_annotation.png)
 
-[关键字](resource/keyword.png)
+[关键字](./resource/keyword.png)
 
-[数字](resource/number.png)
+[数字](./resource/number.png)
 
-[单个字符](resource/char.png)
+[单个字符](./resource/char.png)
 
-[字符串](resource/string.png)
+[字符串](./resource/string.png)
 
 ## 语法分析(Not done)
 
