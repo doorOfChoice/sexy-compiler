@@ -257,6 +257,12 @@ bool lexical::analyse_operator(string::iterator &it, const Meta &m) {
     return false;
 }
 
+/**
+ * 分析单个字符
+ * @param it
+ * @param m
+ * @return
+ */
 bool lexical::analyse_char(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
@@ -315,6 +321,12 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
     return false;
 }
 
+/**
+ * 分析字符串
+ * @param it
+ * @param m
+ * @return
+ */
 bool lexical::analyse_string(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;

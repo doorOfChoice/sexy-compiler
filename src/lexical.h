@@ -10,6 +10,10 @@
 
 using namespace std;
 
+/**
+ * 元数据结构
+ * 单纯用来存储 行、列、迭代器终点
+ */
 struct Meta {
     int line;
     int column;
@@ -42,17 +46,56 @@ private:
     vector<Token> tokens;
     vector<ErrorInfoException> errors;
     set<string> identifiers;
-
+    /**
+     * 分析数字常量
+     * 详细图可以参看 https://github.com/doorOfChoice/sexy-compiler/blob/master/resource/number.png
+     * @param it
+     * @param m
+     * @return
+     */
     bool analyse_number(string::iterator &it, const Meta &m);
 
+    /**
+     * 分析标识符
+     * 详细图可以参看 https://github.com/doorOfChoice/sexy-compiler/blob/master/resource/keyword.png
+     * @param it
+     * @param m
+     * @return
+     */
     bool analyse_identifier(string::iterator &it, const Meta &m);
 
+    /**
+     * 分析分隔符
+     * @param it
+     * @param m
+     * @return
+     */
     bool analyse_delimiter(string::iterator &it, const Meta &m);
 
+    /**
+     * 分析操作符
+     * @param it
+     * @param m
+     * @return
+     */
     bool analyse_operator(string::iterator &it, const Meta &m);
 
+    /**
+     * 分析单个字符
+     * 详细图可以参看 https://github.com/doorOfChoice/sexy-compiler/blob/master/resource/char.png
+     * @param it
+     * @param m
+     * @return
+     */
     bool analyse_char(string::iterator &it, const Meta &m);
 
+    /**
+     * 分析字符串
+     * 详细图可以参看 https://github.com/doorOfChoice/sexy-compiler/blob/master/resource/string.png
+     * @param it
+     * @param m
+     * @return
+     */
     bool analyse_string(string::iterator &it, const Meta &m);
 };
 
