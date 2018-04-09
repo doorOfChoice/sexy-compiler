@@ -34,8 +34,8 @@ void Lexical::analyse(vector<shared_ptr<StringLine>> lines) {
             else if (analyseDelimiter(it, meta));
             else if (analyseIdentifier(it, meta));
             else if (analyseNumber(it, meta));
-            else if (analyseOperator(it,meta));
-            else if(analyseString(it, meta));
+            else if (analyseOperator(it, meta));
+            else if (analyseString(it, meta));
             else {
                 errors.emplace_back(lineNumber, it - begin + 1, string("Unknow Char: ") + *it);
                 return;
@@ -278,24 +278,25 @@ bool Lexical::analyseString(string::iterator &it, const Meta &m) {
                 if (*it != '"')
                     return false;
                 state = 1;
-                buf.push_back(*it);
                 break;
             }
             case 1: {
-                buf.push_back(*it);
-                if (*it == '\\') {
+                if (*it == '\\'){
                     state = 2;
-                } else if (*it == '"') {
-                    state = 4;
+                    buf.push_back(*it);
                 }
+                else if (*it == '"')
+                    state = 4;
+                else
+                    buf.push_back(*it);
+
                 break;
             }
             case 2: {
+                buf.push_back(*it);
                 if (isSpecial(*it)) {
-                    buf.push_back(*it);
                     state = 1;
                 } else if (*it == 'u') {
-                    buf.push_back(*it);
                     state = 3;
                 } else
                     return false;
@@ -303,7 +304,7 @@ bool Lexical::analyseString(string::iterator &it, const Meta &m) {
             }
             case 3: {
                 if (countU++ < 4) {
-                    if(isdigit(*it))buf.push_back(*it);
+                    if (isdigit(*it))buf.push_back(*it);
                     else return false;
                 } else {
                     countU = 0;
