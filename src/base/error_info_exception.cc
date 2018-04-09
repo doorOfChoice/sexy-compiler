@@ -5,7 +5,7 @@
 #include "error_info_exception.h"
 #include <sstream>
 
-ErrorInfoException::ErrorInfoException(int row, int column, const std::string &s) {
+ErrorInfoException::ErrorInfoException(int row, int column, const std::string &s) : row(row), column(column) {
     std::ostringstream ost;
     ost << "row: " << row << ", column: " << column << ", message: " << s << std::endl;
     summary = ost.str();

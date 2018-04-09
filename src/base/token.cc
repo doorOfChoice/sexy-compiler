@@ -9,7 +9,7 @@ Token::Token() = default;
 
 std::string Token::to_string() const {
     char buf[1024];
-    sprintf(buf, "(%d, %d, %s, %s)", row, column, get_typename(type).c_str(), name.c_str());
+    sprintf(buf, "%-5d\t%-2d\t%-10s\t%-s", row, column, get_typename(type).c_str(), name.c_str());
     return std::string(buf);
 }
 
