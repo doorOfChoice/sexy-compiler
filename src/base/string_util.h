@@ -9,7 +9,7 @@
 
 #include <string>
 
-namespace stil {
+namespace sutil {
     /**
      * 去除两边的空白符号，包括\t和\n
      * @return

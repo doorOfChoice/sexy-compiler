@@ -31,7 +31,7 @@ public:
      * 转换字符串为StringLine对象，便于之后换取行数和列数
      * @return
      */
-    static std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>> convert_string(std::string *);
+    static std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>> convert_string(const std::string *);
 
 private:
     //行数

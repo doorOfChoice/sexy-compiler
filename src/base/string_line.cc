@@ -23,7 +23,7 @@
  * @return StringLine集合 + 错误信息列表
  */
 std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>>
-StringLine::convert_string(std::string *s) {
+StringLine::convert_string(const std::string *s) {
     std::vector<std::shared_ptr<StringLine>> sls;
     std::vector<ErrorInfoException> errors;
     int lineNumber = 1;
@@ -70,7 +70,7 @@ StringLine::convert_string(std::string *s) {
             }
                 //处理已经读取了一行的情况
             case 3: {
-                if (!stil::trim(sl->get_text()).empty()) {
+                if (!sutil::trim(sl->get_text()).empty()) {
                     sl->get_text().push_back('\n');
                     sls.push_back(sl);
                 }

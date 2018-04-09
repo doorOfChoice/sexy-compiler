@@ -33,13 +33,14 @@ shared_ptr<string> readCode(const string &fname) {
 }
 
 
-int main() {
+int main(int argc, char **args) {
+    string filename = argc < 2 ? "code.java" : args[1];
     /**
      * 去除注释
      */
-    auto lines = StringLine::convert_string(readCode("code.java").get());
+    auto lines = StringLine::convert_string(readCode(filename).get());
     for (shared_ptr<StringLine> &v:lines.first) {
-        cout << v->get_line() << ":" << v->get_text() ;
+        cout << v->get_line() << ":" << v->get_text();
     }
     /**
      * 加载 关键字、运算符、分隔符表
@@ -51,11 +52,13 @@ int main() {
      */
     lexical lexical(table);
     lexical.analyse(lines.first);
-    cout << "~~~~~~~~errors" << endl;
+
+    cout << "============errors" << endl;
     for (const auto &v : lexical.get_errors()) {
         cout << v.what() << endl;
     }
-    cout << "~~~~~~~~end" << endl;
+    cout << "============end errors" << endl;
+
     for (const auto &v : lexical.get_tokens()) {
         cout << v.to_string() << endl;
     }

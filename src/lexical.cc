@@ -29,7 +29,7 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
         while (it != end) {
             int column = it - begin + 1;
             Meta meta = Meta(lineNumber, column, end);
-            if (stil::is_blank(*it))++it;
+            if (sutil::is_blank(*it))++it;
             else if (analyse_delimiter(it, meta));
             else if (analyse_identifier(it, meta));
             else if (analyse_number(it, meta));
@@ -176,14 +176,14 @@ bool lexical::analyse_identifier(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (!stil::is_key(*it, true))
+                if (!sutil::is_key(*it, true))
                     return false;
                 state = 1;
                 --it;
                 break;
             }
             case 1: {
-                if (stil::is_key(*it))buf.push_back(*it);
+                if (sutil::is_key(*it))buf.push_back(*it);
                 else {
                     --it;
                     state = 2;
@@ -296,7 +296,7 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
                     state = 2;
                 } else if (*it == 'u') {
                     state = 5;
-                } else if (stil::is_octal(*it)) {
+                } else if (sutil::is_octal(*it)) {
                     state = 6;
                     --it;
                     buf.pop_back();
@@ -317,7 +317,7 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
             }
             case 6: {
                 if (countO++ < 3) {
-                    if (stil::is_octal(*it))buf.push_back(*it);
+                    if (sutil::is_octal(*it))buf.push_back(*it);
                     else return false;
                 } else {
                     --it;
@@ -374,7 +374,7 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
                     state = 1;
                 } else if (*it == 'u') {
                     state = 3;
-                } else if (stil::is_octal(*it)) {
+                } else if (sutil::is_octal(*it)) {
                     --it;
                     buf.pop_back();
                     state = 4;
@@ -395,7 +395,7 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
             }
             case 4: {
                 if (countO++ < 3) {
-                    if (stil::is_octal(*it))buf.push_back(*it);
+                    if (sutil::is_octal(*it))buf.push_back(*it);
                     else return false;
                 } else {
                     --it;
