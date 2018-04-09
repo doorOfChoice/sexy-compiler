@@ -29,17 +29,18 @@ void Lexical::analyse(vector<shared_ptr<StringLine>> lines) {
         lineNumber = line->getLine();
         while (it != end) {
             int column = it - begin + 1;
+            Meta meta = Meta(lineNumber, column, end);
             if (StringUtil::isBlank(*it))++it;
-            else if (analyseDelimiter(it, Meta(lineNumber, column, end)));
-            else if (analyseIdentifier(it, Meta(lineNumber, column, end)));
-            else if (analyseNumber(it, Meta(lineNumber, column, end)));
-            else if (analyseOperator(it, Meta(lineNumber, column, end)));
+            else if (analyseDelimiter(it, meta));
+            else if (analyseIdentifier(it, meta));
+            else if (analyseNumber(it, meta));
+            else if (analyseOperator(it,meta));
+            else if(analyseString(it, meta));
             else {
                 errors.emplace_back(lineNumber, it - begin + 1, string("Unknow Char: ") + *it);
                 return;
             }
         }
-
     }
 }
 
@@ -67,7 +68,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                 else if (tolower(*it) == 'f') {
                     buf.push_back(*it);
                     state = 9;
-                }else if(tolower(*it) == 'l') {
+                } else if (tolower(*it) == 'l') {
                     buf.push_back(*it);
                     state = 10;
                 } else if (*it == '.') {
@@ -97,7 +98,7 @@ bool Lexical::analyseNumber(string::iterator &it, const Meta &m) {
                 else if (tolower(*it) == 'f') {
                     buf.push_back(*it);
                     state = 9;
-                } else if(tolower(*it) == 'l') {
+                } else if (tolower(*it) == 'l') {
                     buf.push_back(*it);
                     state = 10;
                 } else if (*it == 'e') {
@@ -251,6 +252,68 @@ bool Lexical::analyseOperator(string::iterator &it, const Meta &m) {
             }
             case 2: {
                 Token t(m.line, m.column, Token::OPERATOR, buf);
+                tokens.push_back(t);
+                return true;
+            }
+        }
+        ++it;
+    }
+    return false;
+}
+
+bool Lexical::analyseChar(string::iterator &it, const Meta &m) {
+    return false;
+}
+
+bool Lexical::analyseString(string::iterator &it, const Meta &m) {
+    int state = 0;
+    string buf;
+
+    //判断是否是需要转义的字符
+    auto isSpecial = [](char ch) -> bool { return ch == '\\' || ch == '"' || ch == '\''; };
+    int countU = 0;
+    while (it != m.end) {
+        switch (state) {
+            case 0: {
+                if (*it != '"')
+                    return false;
+                state = 1;
+                buf.push_back(*it);
+                break;
+            }
+            case 1: {
+                buf.push_back(*it);
+                if (*it == '\\') {
+                    state = 2;
+                } else if (*it == '"') {
+                    state = 4;
+                }
+                break;
+            }
+            case 2: {
+                if (isSpecial(*it)) {
+                    buf.push_back(*it);
+                    state = 1;
+                } else if (*it == 'u') {
+                    buf.push_back(*it);
+                    state = 3;
+                } else
+                    return false;
+                break;
+            }
+            case 3: {
+                if (countU++ < 4) {
+                    if(isdigit(*it))buf.push_back(*it);
+                    else return false;
+                } else {
+                    countU = 0;
+                    state = 1;
+                    --it;
+                }
+                break;
+            }
+            case 4: {
+                Token t(m.line, m.column, Token::STRING, buf);
                 tokens.push_back(t);
                 return true;
             }

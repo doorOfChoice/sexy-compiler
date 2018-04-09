@@ -50,6 +50,10 @@ private:
     bool analyseDelimiter(string::iterator &it, const Meta &m);
 
     bool analyseOperator(string::iterator &it, const Meta &m);
+
+    bool analyseChar(string::iterator &it, const Meta &m);
+
+    bool analyseString(string::iterator &it, const Meta &m);
 };
 
 #endif //C_LEXICAL_H

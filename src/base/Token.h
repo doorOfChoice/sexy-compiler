@@ -36,6 +36,9 @@ public:
     static const int DELIMITERS = 3;
     static const int IDENTIFIER = 4;
     static const int NUMBER = 5;
+    static const int STRING = 6;
+    static const int CHAR = 7;
+
     static std::string getTypeName(int type);
 
 private:
