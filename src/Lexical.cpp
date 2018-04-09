@@ -35,6 +35,7 @@ void Lexical::analyse(vector<shared_ptr<StringLine>> lines) {
             else if (analyseIdentifier(it, meta));
             else if (analyseNumber(it, meta));
             else if (analyseOperator(it, meta));
+            else if(analyseChar(it, meta));
             else if (analyseString(it, meta));
             else {
                 errors.emplace_back(lineNumber, it - begin + 1, string("Unknow Char: ") + *it);
@@ -262,6 +263,60 @@ bool Lexical::analyseOperator(string::iterator &it, const Meta &m) {
 }
 
 bool Lexical::analyseChar(string::iterator &it, const Meta &m) {
+    int state = 0;
+    string buf;
+    auto isSpecial = [](char ch) -> bool { return ch == '\\' || ch == '"' || ch == '\''; };
+    int countU = 0;
+    while (it != m.end) {
+        switch (state) {
+            case 0: {
+                if (*it != '\'')
+                    return false;
+                state = 1;
+                break;
+            }
+            case 1: {
+                if (*it == '\\')
+                    state = 4;
+                else
+                    state = 2;
+                buf.push_back(*it);
+                break;
+            }
+            case 2: {
+                if (*it != '\'')
+                    return false;
+                state = 3;
+                break;
+            }
+            case 3: {
+                Token t(m.line, m.column, Token::CHAR, buf);
+                tokens.push_back(t);
+                return true;
+            }
+            case 4: {
+                buf.push_back(*it);
+                if(isSpecial(*it)) {
+                    state = 2;
+                }else if(*it == 'u') {
+                    state = 5;
+                }else {
+                    return false;
+                }
+                break;
+            }
+            case 5: {
+                if(countU++ < 4) {
+                    if(isdigit(*it))buf.push_back(*it);
+                    else return false;
+                }else {
+                    --it;
+                    state = 2;
+                }
+            }
+        }
+        ++it;
+    }
     return false;
 }
 
@@ -281,11 +336,10 @@ bool Lexical::analyseString(string::iterator &it, const Meta &m) {
                 break;
             }
             case 1: {
-                if (*it == '\\'){
+                if (*it == '\\') {
                     state = 2;
                     buf.push_back(*it);
-                }
-                else if (*it == '"')
+                } else if (*it == '"')
                     state = 4;
                 else
                     buf.push_back(*it);
