@@ -97,10 +97,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 else if (tolower(*it) == 'f') {
                     buf.push_back(*it);
                     state = 9;
-                } else if (tolower(*it) == 'l') {
-                    buf.push_back(*it);
-                    state = 10;
-                } else if (*it == 'e') {
+                }else if (*it == 'e') {
                     buf.push_back(*it);
                     state = 5;
                 } else if (!isalpha(*it)) {
