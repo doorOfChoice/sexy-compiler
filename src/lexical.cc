@@ -44,7 +44,7 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
                 error_type = Token::IDENTIFIER;
                 error_happen = true;
                 break;
-            } else if (isdigit(*it) || (*it == '.' && isdigit(*(it + 1)))) {
+            } else if (isdigit(*it) || (*it == '0' && tolower(*it) == 'x') || (*it == '.' && isdigit(*(it + 1)))) {
                 if (analyse_number(it, meta))continue;
                 error_type = Token::NUMBER;
                 error_happen = true;
@@ -87,7 +87,7 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
 
     if (error_happen) {
         errors.emplace_back(meta.line, meta.column, colum_end,
-                                            string(Token::get_typename(error_type)) + "解析出现错误");
+                            string(Token::get_typename(error_type)) + "解析出现错误");
     }
 }
 
@@ -104,6 +104,13 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
         switch (state) {
             case 0: {
                 if (isdigit(*it)) {
+                    if (*it == '0' && tolower(*(it + 1)) == 'x') {
+                        ++it;
+                        buf.push_back('0');
+                        buf.push_back(*it);
+                        state = 8;
+                        break;
+                    }
                     state = 1;
                     --it;
                 } else if (*it == '.') {
@@ -119,7 +126,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                     state = 7;
                 } else if (tolower(*it) == 'l') {
                     buf.push_back(*it);
-                    state = 8;
+                    state = 9;
                 } else if (*it == '.') {
                     buf.push_back(*it);
                     state = 2;
@@ -128,7 +135,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                     state = 4;
                 } else if (!isalpha(*it)) {
                     --it;
-                    state = 9;
+                    state = 10;
                 } else
                     return false;
 
@@ -152,7 +159,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                     state = 4;
                 } else if (!isalpha(*it)) {
                     --it;
-                    state = 9;
+                    state = 10;
                 } else
                     return false;
 
@@ -181,7 +188,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 if (isdigit(*it)) buf.push_back(*it);
                 else if (!isalpha(*it)) {
                     --it;
-                    state = 9;
+                    state = 10;
                 } else
                     return false;
                 break;
@@ -190,20 +197,29 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
             case 7: {
                 if (!isalpha(*it)) {
                     --it;
-                    state = 9;
+                    state = 10;
                 } else
                     return false;
                 break;
             }
             case 8: {
-                if (!isalpha(*it)) {
+                if (isxdigit(*it))buf.push_back(*it);
+                else if (tolower(*(it - 1)) != 'x' && !isalpha(*it)) {
                     --it;
-                    state = 9;
+                    state = 10;
                 } else
                     return false;
                 break;
             }
             case 9: {
+                if (!isalpha(*it)) {
+                    --it;
+                    state = 10;
+                } else
+                    return false;
+                break;
+            }
+            case 10: {
                 Token t(m.line, m.column, Token::NUMBER, buf);
                 tokens.push_back(t);
                 return true;
