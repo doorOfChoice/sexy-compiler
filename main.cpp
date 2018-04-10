@@ -34,28 +34,38 @@ shared_ptr<string> readCode(const string &fname) {
     return s;
 }
 
+void print_error_color(
+        __gnu_cxx::__normal_iterator<const ErrorInfoException *, vector<ErrorInfoException, allocator<ErrorInfoException>>> &eit,
+        const vector<ErrorInfoException> &errors, const shared_ptr<StringLine> &sl, int column) {
+    if (eit != errors.end()) {
+        if ((sl->get_line() == eit->get_row() && column > eit->get_column()) || sl->get_line() > eit->get_row())
+            ++eit;
+        if (eit->get_row() == sl->get_line()) {
+            if (column >= eit->get_column_begin() && column <= eit->get_column()) {
+                cout << bg::red << style::underline;
+            }
+        }
+    }
+}
+
+void reset_error_color(
+        __gnu_cxx::__normal_iterator<const ErrorInfoException *, vector<ErrorInfoException, allocator<ErrorInfoException>>> &eit,
+        const vector<ErrorInfoException> &errors) {
+    if (eit != errors.end())
+        cout << bg::reset << fg::reset << style::reset;
+}
+
 void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoException> &errors) {
     system("clear");
-    auto eit = errors.begin();
-    auto end = errors.end();
+    __gnu_cxx::__normal_iterator<const ErrorInfoException *, vector<ErrorInfoException, allocator<ErrorInfoException>>> eit = errors.begin();
     for (const auto &it : v) {
         cout << fg::yellow << it->get_line() << fg::reset << ": ";
         for (int i = 0; i < it->get_text().size(); ++i) {
             int column = i + 1;
-            if (eit != end) {
-                if((it->get_line() == eit->get_row() && column > eit->get_column()) || it->get_line() > eit->get_row())
-                    ++eit;
-                if (eit->get_row() == it->get_line()) {
-                    if (column >= eit->get_column_begin() && column <= eit->get_column()) {
-                        cout << bg::red << style::underline;
-                    }
-                }
-            }
+            print_error_color(eit, errors, it, column);
             cout << it->get_text()[i];
-            if (eit != end)
-                cout << bg::reset << fg::reset << style::reset;
         }
-
+        reset_error_color(eit, errors);
     }
 }
 
