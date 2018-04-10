@@ -31,9 +31,10 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
             auto seg_begin = it;
             Meta meta = Meta(lineNumber, column, end);
             if (sutil::is_blank(*it))++it;
-            else if (analyse_delimiter(it, meta));
             else if (analyse_identifier(it, meta));
             else if (analyse_number(it, meta));
+            else if (analyse_annotation(it, meta));
+            else if (analyse_delimiter(it, meta));
             else if (analyse_operator(it, meta));
             else if (analyse_char(it, meta));
             else if (analyse_string(it, meta));
@@ -57,10 +58,14 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 1: {
-                if (!isdigit(*it))
+                if (isdigit(*it)) {
+                    state = 2;
+                    --it;
+                } else if (*it == '.' && isdigit(*(it + 1))) {
+                    state = 4;
+                    buf.push_back(*it);
+                } else
                     return false;
-                state = 2;
-                --it;
                 break;
             }
             case 2: {
@@ -407,6 +412,43 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
             }
             case 5: {
                 Token t(m.line, m.column, Token::STRING, buf);
+                tokens.push_back(t);
+                return true;
+            }
+        }
+        ++it;
+    }
+    return false;
+}
+
+bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
+    int state = 0;
+    string buf;
+    while (it != m.end) {
+        switch (state) {
+            case 0: {
+                if (*it != '@' )
+                    return false;
+                state = 1;
+                break;
+            }
+            case 1: {
+                if (!sutil::is_key(*it, true))
+                    return false;
+                --it;
+                state = 2;
+                break;
+            }
+            case 2: {
+                if (sutil::is_key(*it))buf.push_back(*it);
+                else {
+                    --it;
+                    state = 3;
+                }
+                break;
+            }
+            case 3: {
+                Token t(m.line, m.column, Token::ANNOTATION, buf);
                 tokens.push_back(t);
                 return true;
             }

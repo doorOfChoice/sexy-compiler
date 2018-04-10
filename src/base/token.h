@@ -28,9 +28,8 @@ public:
     static const int IDENTIFIER = 4;
     static const int NUMBER = 5;
     static const int STRING = 6;
-
     static const int CHAR = 7;
-
+    static const int ANNOTATION = 8;
 };
 
 

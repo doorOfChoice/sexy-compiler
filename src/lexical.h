@@ -97,6 +97,14 @@ private:
      * @return
      */
     bool analyse_string(string::iterator &it, const Meta &m);
+
+    /**
+     * 识别注解
+     * @param it
+     * @param m
+     * @return
+     */
+    bool analyse_annotation(string::iterator &it, const Meta &m);
 };
 
 #endif //C_LEXICAL_H

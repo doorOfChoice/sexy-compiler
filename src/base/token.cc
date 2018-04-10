@@ -29,6 +29,8 @@ std::string Token::get_typename(int type) {
             return "string";
         case CHAR:
             return "char";
+        case ANNOTATION:
+            return "annotation";
         default:
             return "unknown";
     }
