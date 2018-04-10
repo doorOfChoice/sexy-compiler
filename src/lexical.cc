@@ -21,6 +21,11 @@ const set<string> &lexical::get_identifiers() const {
  * @param lines 需要分析的行段
  */
 void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
+    Meta meta;
+    int error_type = -1;
+    int colum_end = 0;
+    bool error_happen = false;
+
     for (const auto &line : lines) {
         auto begin = line->get_text().begin();
         auto end = line->get_text().end();
@@ -28,21 +33,61 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
         int lineNumber = line->get_line();
         while (it != end) {
             int column = it - begin + 1;
-            auto seg_begin = it;
-            Meta meta = Meta(lineNumber, column, end);
-            if (sutil::is_blank(*it))++it;
-            else if (analyse_identifier(it, meta));
-            else if (analyse_number(it, meta));
-            else if (analyse_annotation(it, meta));
-            else if (analyse_delimiter(it, meta));
-            else if (analyse_operator(it, meta));
-            else if (analyse_char(it, meta));
-            else if (analyse_string(it, meta));
-            else {
-                errors.emplace_back(lineNumber, seg_begin - begin + 1, it - begin + 1, string("Unknow Char: ") + *it);
-                return;
+            meta = Meta(lineNumber, column, end);
+            //空白字符不判断
+            if (sutil::is_blank(*it)) {
+                ++it;
+                continue;
+            }
+            if (sutil::is_key(*it, true)) {
+                if (analyse_identifier(it, meta)) continue;
+                error_type = Token::IDENTIFIER;
+                error_happen = true;
+                break;
+            } else if (isdigit(*it) || (*it == '.' && isdigit(*(it + 1)))) {
+                if (analyse_number(it, meta))continue;
+                error_type = Token::NUMBER;
+                error_happen = true;
+                break;
+            } else if (*it == '@') {
+                if (analyse_annotation(it, meta))continue;
+                error_type = Token::ANNOTATION;
+                error_happen = true;
+                break;
+            } else if (table.in_delimiter(*it)) {
+                if (analyse_delimiter(it, meta))continue;
+                error_type = Token::DELIMITERS;
+                error_happen = true;
+                break;
+            } else if (table.in_operator(*it)) {
+                if (analyse_operator(it, meta))continue;
+                error_type = Token::OPERATOR;
+                error_happen = true;
+                break;
+            } else if (*it == '\'') {
+                if (analyse_char(it, meta))continue;
+                error_type = Token::CHAR;
+                error_happen = true;
+                break;
+            } else if (*it == '\"') {
+                if (analyse_string(it, meta))continue;
+                error_type = Token::STRING;
+                error_happen = true;
+                break;
+            } else {
+                error_happen = true;
+                break;
             }
         }
+        if (error_happen) {
+            colum_end = it - begin + 1;
+            break;
+        }
+    }
+
+    if (error_happen) {
+        errors.emplace_back(meta.line, meta.column, colum_end,
+                                            string(Token::get_typename(error_type)) + "解析出现错误");
     }
 }
 
@@ -53,113 +98,112 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
  * @return
  */
 bool lexical::analyse_number(string::iterator &it, const Meta &m) {
-    int state = 1;
+    int state = 0;
     string buf;
     while (it != m.end) {
         switch (state) {
-            case 1: {
+            case 0: {
                 if (isdigit(*it)) {
-                    state = 2;
+                    state = 1;
                     --it;
-                } else if (*it == '.' && isdigit(*(it + 1))) {
-                    state = 4;
+                } else if (*it == '.') {
+                    state = 3;
                     buf.push_back(*it);
+                }
+                break;
+            }
+            case 1: {
+                if (isdigit(*it))buf.push_back(*it);
+                else if (tolower(*it) == 'f') {
+                    buf.push_back(*it);
+                    state = 7;
+                } else if (tolower(*it) == 'l') {
+                    buf.push_back(*it);
+                    state = 8;
+                } else if (*it == '.') {
+                    buf.push_back(*it);
+                    state = 2;
+                } else if (*it == 'e') {
+                    buf.push_back(*it);
+                    state = 4;
+                } else if (!isalpha(*it)) {
+                    --it;
+                    state = 9;
                 } else
                     return false;
+
                 break;
             }
             case 2: {
-                if (isdigit(*it))buf.push_back(*it);
-                else if (tolower(*it) == 'f') {
-                    buf.push_back(*it);
-                    state = 9;
-                } else if (tolower(*it) == 'l') {
-                    buf.push_back(*it);
-                    state = 10;
-                } else if (*it == '.') {
-                    buf.push_back(*it);
-                    state = 3;
-                } else if (*it == 'e') {
-                    buf.push_back(*it);
-                    state = 5;
-                } else if (!isalpha(*it)) {
-                    --it;
-                    state = 8;
-                } else
+                if (!isdigit(*it)) {
                     return false;
-
+                }
+                --it;
+                state = 3;
                 break;
             }
             case 3: {
-                if (!isdigit(*it)) {
-                    return false;
-                }
-                --it;
-                state = 4;
-                break;
-            }
-            case 4: {
                 if (isdigit(*it))buf.push_back(*it);
                 else if (tolower(*it) == 'f') {
                     buf.push_back(*it);
-                    state = 9;
+                    state = 7;
                 } else if (*it == 'e') {
                     buf.push_back(*it);
-                    state = 5;
+                    state = 4;
                 } else if (!isalpha(*it)) {
                     --it;
-                    state = 8;
+                    state = 9;
                 } else
                     return false;
 
                 break;
             }
-            case 5: {
+            case 4: {
                 if (*it == '-' || *it == '+') {
                     buf.push_back(*it);
-                    state = 6;
+                    state = 5;
                 } else if (isdigit(*it)) {
                     --it;
-                    state = 7;
+                    state = 6;
                 } else
                     return false;
                 break;
             }
-            case 6: {
+            case 5: {
                 if (!isdigit(*it)) {
                     return false;
                 }
                 --it;
-                state = 7;
+                state = 6;
                 break;
             }
-            case 7: {
+            case 6: {
                 if (isdigit(*it)) buf.push_back(*it);
                 else if (!isalpha(*it)) {
                     --it;
-                    state = 8;
+                    state = 9;
                 } else
                     return false;
                 break;
             }
                 //处理浮点数符号f
-            case 9: {
+            case 7: {
                 if (!isalpha(*it)) {
                     --it;
-                    state = 8;
-                } else
-                    return false;
-                break;
-            }
-            case 10: {
-                if (!isalpha(*it)) {
-                    --it;
-                    state = 8;
+                    state = 9;
                 } else
                     return false;
                 break;
             }
             case 8: {
+                if (!isalpha(*it)) {
+                    --it;
+                    state = 9;
+                } else
+                    return false;
+                break;
+            }
+            case 9: {
                 Token t(m.line, m.column, Token::NUMBER, buf);
                 tokens.push_back(t);
                 return true;
@@ -182,10 +226,8 @@ bool lexical::analyse_identifier(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (!sutil::is_key(*it, true))
-                    return false;
-                state = 1;
                 --it;
+                state = 1;
                 break;
             }
             case 1: {
@@ -234,13 +276,11 @@ bool lexical::analyse_delimiter(string::iterator &it, const Meta &m) {
 bool lexical::analyse_operator(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
-    buf.push_back(*it);
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (!table.in_operator(buf))
-                    return false;
                 state = 1;
+                buf.push_back(*it);
                 break;
             }
             case 1: {
@@ -277,14 +317,12 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (*it != '\'')
-                    return false;
                 state = 1;
                 break;
             }
             case 1: {
                 if (*it == '\\')
-                    state = 4;
+                    state = 3;
                 else
                     state = 2;
                 buf.push_back(*it);
@@ -293,17 +331,17 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
             case 2: {
                 if (*it != '\'')
                     return false;
-                state = 3;
+                state = 6;
                 break;
             }
-            case 4: {
+            case 3: {
                 buf.push_back(*it);
                 if (table.in_escape_chars(*it)) {
                     state = 2;
                 } else if (*it == 'u') {
-                    state = 5;
+                    state = 4;
                 } else if (sutil::is_octal(*it)) {
-                    state = 6;
+                    state = 5;
                     --it;
                     buf.pop_back();
                 } else {
@@ -311,7 +349,7 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
                 }
                 break;
             }
-            case 5: {
+            case 4: {
                 if (countU++ < 4) {
                     if (isxdigit(*it))buf.push_back(*it);
                     else return false;
@@ -321,7 +359,7 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
                 }
                 break;
             }
-            case 6: {
+            case 5: {
                 if (countO++ < 3) {
                     if (sutil::is_octal(*it))buf.push_back(*it);
                     else return false;
@@ -331,7 +369,7 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
                 }
                 break;
             }
-            case 3: {
+            case 6: {
                 Token t(m.line, m.column, Token::CHAR, buf);
                 tokens.push_back(t);
                 return true;
@@ -358,8 +396,6 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (*it != '"')
-                    return false;
                 state = 1;
                 break;
             }
@@ -427,8 +463,6 @@ bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
     while (it != m.end) {
         switch (state) {
             case 0: {
-                if (*it != '@' )
-                    return false;
                 state = 1;
                 break;
             }

@@ -48,7 +48,7 @@ void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoE
                 }
             }
             cout << it->get_text()[i];
-            if (!errors.empty()) cout << bg::reset;
+            if (!errors.empty()) cout << bg::reset << fg::reset;
         }
     }
 }
@@ -101,9 +101,9 @@ int main(int argc, char **args) {
 
 /*
  * TODO:
- * 1. 需要修复cout输出不完整
+ * 1. 需要修复cout输出不完整 √
  * 2. 重新定义一下各种表，只用一种int，太单调
- * 3. 使用状态机重写词法分析器
- * 4. 熟练掌握C++使用
- * 5. 遇到异常不进行判断
+ * 3. 使用状态机重写词法分析器 √
+ * 4. 熟练掌握C++使用 √×
+ * 5. 遇到异常不进行判断 √
  */

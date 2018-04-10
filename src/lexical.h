@@ -17,7 +17,8 @@ using namespace std;
 struct Meta {
     int line;
     int column;
-    string::iterator &end;
+    string::iterator end;
+    Meta() {}
 
     Meta(int line, int column, string::iterator &end) : line(
             line), column(column), end(end) {}

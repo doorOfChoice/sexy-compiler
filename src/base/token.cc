@@ -9,29 +9,29 @@ Token::Token() = default;
 
 std::string Token::to_string() const {
     char buf[1024];
-    sprintf(buf, "%-5d\t%-2d\t%-10s\t%-s", row, column, get_typename(type).c_str(), name.c_str());
+    sprintf(buf, "%-5d\t%-2d\t%-20s\t%-s", row, column, get_typename(type).c_str(), name.c_str());
     return std::string(buf);
 }
 
 std::string Token::get_typename(int type) {
     switch (type) {
         case KEY_WORD:
-            return "keyword";
+            return "(关键字)keyword";
         case OPERATOR:
-            return "operator";
+            return "(操作符)operator";
         case DELIMITERS:
-            return "delimiter";
+            return "(分隔符)delimiter";
         case IDENTIFIER:
-            return "id";
+            return "(标识符)id";
         case NUMBER:
-            return "number";
+            return "(数字)  number";
         case STRING:
-            return "string";
+            return "(字符串)string";
         case CHAR:
-            return "char";
+            return "(字符)  char";
         case ANNOTATION:
-            return "annotation";
+            return "(注解)  annotation";
         default:
-            return "unknown";
+            return "(未知)  unknown";
     }
 }
