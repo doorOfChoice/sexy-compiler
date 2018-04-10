@@ -22,10 +22,6 @@ const set<string> &lexical::get_identifiers() const {
  */
 void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
     Meta meta;
-    int error_type = -1;
-    int colum_end = 0;
-    bool error_happen = false;
-
     for (const auto &line : lines) {
         auto begin = line->get_text().begin();
         auto end = line->get_text().end();
@@ -33,7 +29,7 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
         int lineNumber = line->get_line();
         while (it != end) {
             int column = it - begin + 1;
-            meta = Meta(lineNumber, column, end);
+            meta = Meta(lineNumber, column, it, begin, end);
             //空白字符不判断
             if (sutil::is_blank(*it)) {
                 ++it;
@@ -41,53 +37,22 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
             }
             if (sutil::is_key(*it, true)) {
                 if (analyse_identifier(it, meta)) continue;
-                error_type = Token::IDENTIFIER;
-                error_happen = true;
-                break;
             } else if (isdigit(*it) || (*it == '0' && tolower(*it) == 'x') || (*it == '.' && isdigit(*(it + 1)))) {
                 if (analyse_number(it, meta))continue;
-                error_type = Token::NUMBER;
-                error_happen = true;
-                break;
             } else if (*it == '@') {
                 if (analyse_annotation(it, meta))continue;
-                error_type = Token::ANNOTATION;
-                error_happen = true;
-                break;
             } else if (table.in_delimiter(*it)) {
                 if (analyse_delimiter(it, meta))continue;
-                error_type = Token::DELIMITERS;
-                error_happen = true;
-                break;
             } else if (table.in_operator(*it)) {
                 if (analyse_operator(it, meta))continue;
-                error_type = Token::OPERATOR;
-                error_happen = true;
-                break;
             } else if (*it == '\'') {
                 if (analyse_char(it, meta))continue;
-                error_type = Token::CHAR;
-                error_happen = true;
-                break;
             } else if (*it == '\"') {
                 if (analyse_string(it, meta))continue;
-                error_type = Token::STRING;
-                error_happen = true;
-                break;
             } else {
-                error_happen = true;
-                break;
+                error(it, meta, "非法的字符");
             }
         }
-        if (error_happen) {
-            colum_end = it - begin + 1;
-            break;
-        }
-    }
-
-    if (error_happen) {
-        errors.emplace_back(meta.line, meta.column, colum_end,
-                            string(Token::get_typename(error_type)) + "解析出现错误");
     }
 }
 
@@ -111,14 +76,17 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                         state = 8;
                         break;
                     }
-                    state = 1;
                     --it;
+                    state = 1;
                 } else if (*it == '.') {
                     state = 3;
                     buf.push_back(*it);
-                }
+                } else
+                    return false;
+
                 break;
             }
+                //普通数字判断
             case 1: {
                 if (isdigit(*it))buf.push_back(*it);
                 else if (tolower(*it) == 'f') {
@@ -136,19 +104,24 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 } else if (!isalpha(*it)) {
                     --it;
                     state = 10;
-                } else
+                } else {
+                    error(it, m, "错误的数字表达方式");
                     return false;
+                }
 
                 break;
             }
+                //小数判断
             case 2: {
                 if (!isdigit(*it)) {
+                    error(it, m, "错误的小数");
                     return false;
                 }
                 --it;
                 state = 3;
                 break;
             }
+                // .4 类型小数
             case 3: {
                 if (isdigit(*it))buf.push_back(*it);
                 else if (tolower(*it) == 'f') {
@@ -160,11 +133,14 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 } else if (!isalpha(*it)) {
                     --it;
                     state = 10;
-                } else
+                } else {
+                    error(it, m, "错误的小数");
                     return false;
+                }
 
                 break;
             }
+                //e计数
             case 4: {
                 if (*it == '-' || *it == '+') {
                     buf.push_back(*it);
@@ -172,12 +148,16 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 } else if (isdigit(*it)) {
                     --it;
                     state = 6;
-                } else
+                } else {
+                    error(it, m, "错误的科学记数法");
                     return false;
+                }
                 break;
             }
+                //e的指数,含+-
             case 5: {
                 if (!isdigit(*it)) {
+                    error(it, m, "错误的e指数");
                     return false;
                 }
                 --it;
@@ -189,8 +169,10 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 else if (!isalpha(*it)) {
                     --it;
                     state = 10;
-                } else
+                } else {
+                    error(it, m, "错误的e指数");
                     return false;
+                }
                 break;
             }
                 //处理浮点数符号f
@@ -198,8 +180,10 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 if (!isalpha(*it)) {
                     --it;
                     state = 10;
-                } else
+                } else {
+                    error(it, m, "错误的f后缀表示");
                     return false;
+                }
                 break;
             }
             case 8: {
@@ -207,16 +191,20 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
                 else if (tolower(*(it - 1)) != 'x' && !isalpha(*it)) {
                     --it;
                     state = 10;
-                } else
+                } else {
+                    error(it, m, "错误的十六进制表示");
                     return false;
+                }
                 break;
             }
             case 9: {
                 if (!isalpha(*it)) {
                     --it;
                     state = 10;
-                } else
+                } else {
+                    error(it, m, "非16进制数字后面不应该跟无关字母");
                     return false;
+                }
                 break;
             }
             case 10: {
@@ -344,12 +332,16 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
                 buf.push_back(*it);
                 break;
             }
+                //分析普通字符
             case 2: {
-                if (*it != '\'')
+                if (*it != '\'') {
+                    error(it, m, "非法的字符结尾");
                     return false;
+                }
                 state = 6;
                 break;
             }
+                //分析普通转义字符
             case 3: {
                 buf.push_back(*it);
                 if (table.in_escape_chars(*it)) {
@@ -361,24 +353,38 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
                     --it;
                     buf.pop_back();
                 } else {
+                    error(it, m, "非法的转义字符");
                     return false;
                 }
                 break;
             }
+                // 分析\uFFFF
             case 4: {
                 if (countU++ < 4) {
                     if (isxdigit(*it))buf.push_back(*it);
-                    else return false;
+                    else {
+                        error(it, m, "unicode表示法需要4位16进制数");
+                        return false;
+                    }
                 } else {
                     --it;
                     state = 2;
                 }
                 break;
             }
+                //分析 \八进制*3
             case 5: {
-                if (countO++ < 3) {
-                    if (sutil::is_octal(*it))buf.push_back(*it);
-                    else return false;
+                if (countO < 3) {
+                    if (sutil::is_octal(*it)) {
+                        ++countO;
+                        buf.push_back(*it);
+                    } else if (countO != 0) {
+                        --it;
+                        state = 2;
+                    } else {
+                        error(it, m, "八进制字符需要1-3位八进制数");
+                        return false;
+                    }
                 } else {
                     --it;
                     state = 2;
@@ -415,6 +421,7 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
                 state = 1;
                 break;
             }
+                //分析普通字符
             case 1: {
                 if (*it == '\\') {
                     state = 2;
@@ -426,6 +433,7 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
 
                 break;
             }
+                //分析普通转义字符
             case 2: {
                 buf.push_back(*it);
                 if (table.in_escape_chars(*it)) {
@@ -436,30 +444,47 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
                     --it;
                     buf.pop_back();
                     state = 4;
-                } else
+                } else {
+                    error(it, m, "非法的转义字符");
                     return false;
+                }
                 break;
             }
+                //分析 \uFFFF
             case 3: {
                 if (countU++ < 4) {
                     if (isxdigit(*it))buf.push_back(*it);
-                    else return false;
+                    else {
+                        error(it, m, "unicode表示法需要4位16进制数");
+                        return false;
+                    }
                 } else {
+                    --it;
                     countU = 0;
                     state = 1;
-                    --it;
                 }
                 break;
             }
+                // 分析\八进制*3
             case 4: {
-                if (countO++ < 3) {
-                    if (sutil::is_octal(*it))buf.push_back(*it);
-                    else return false;
-                } else {
+                auto init = [&it, &countO, &state]() -> void {
                     --it;
                     countO = 0;
                     state = 1;
-                }
+                };
+                if (countO++ < 3) {
+                    if (sutil::is_octal(*it)) {
+                        ++countO;
+                        buf.push_back(*it);
+                    } else if (countO != 0) {
+                        init();
+                    } else {
+                        error(it, m, "八进制字符需要1-3位八进制数");
+                        return false;
+                    }
+                } else
+                    init();
+
                 break;
             }
             case 5: {
@@ -483,8 +508,10 @@ bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
                 break;
             }
             case 1: {
-                if (!sutil::is_key(*it, true))
+                if (!sutil::is_key(*it, true)){
+                    error(it, m, "注解的不能以非字母开头");
                     return false;
+                }
                 --it;
                 state = 2;
                 break;
@@ -505,6 +532,12 @@ bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
         }
         ++it;
     }
+    return false;
+}
+
+bool lexical::error(string::iterator &it, const Meta &m, const string &message) {
+    errors.emplace_back(m.line, m.column, it - m.begin + 1, message + ":" + string(m.cur_begin, it + 1));
+    while (it != m.end && !sutil::is_blank(*it) && !table.in_delimiter(*it))++it;
     return false;
 }
 

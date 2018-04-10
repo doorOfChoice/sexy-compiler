@@ -36,20 +36,26 @@ shared_ptr<string> readCode(const string &fname) {
 
 void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoException> &errors) {
     system("clear");
+    auto eit = errors.begin();
+    auto end = errors.end();
     for (const auto &it : v) {
         cout << fg::yellow << it->get_line() << fg::reset << ": ";
         for (int i = 0; i < it->get_text().size(); ++i) {
             int column = i + 1;
-            if (!errors.empty()) {
-                if (errors[0].get_row() == it->get_line()) {
-                    cout << bg::blue;
-                    if (column >= errors[0].get_column_begin() && column <= errors[0].get_column())
-                        cout << bg::red;
+            if (eit != end) {
+                if((it->get_line() == eit->get_row() && column > eit->get_column()) || it->get_line() > eit->get_row())
+                    ++eit;
+                if (eit->get_row() == it->get_line()) {
+                    if (column >= eit->get_column_begin() && column <= eit->get_column()) {
+                        cout << bg::red << style::underline;
+                    }
                 }
             }
             cout << it->get_text()[i];
-            if (!errors.empty()) cout << bg::reset << fg::reset;
+            if (eit != end)
+                cout << bg::reset << fg::reset << style::reset;
         }
+
     }
 }
 

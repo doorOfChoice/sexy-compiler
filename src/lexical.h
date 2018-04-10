@@ -17,11 +17,13 @@ using namespace std;
 struct Meta {
     int line;
     int column;
+    string::iterator cur_begin;
+    string::iterator begin;
     string::iterator end;
     Meta() {}
 
-    Meta(int line, int column, string::iterator &end) : line(
-            line), column(column), end(end) {}
+    Meta(int line, int column, string::iterator &cur_begin, string::iterator &begin, string::iterator &end) : line(
+            line), column(column), end(end), begin(begin), cur_begin(cur_begin) {}
 };
 
 class lexical {
@@ -106,6 +108,8 @@ private:
      * @return
      */
     bool analyse_annotation(string::iterator &it, const Meta &m);
+
+    bool error(string::iterator &it, const Meta &m, const string &message);
 };
 
 #endif //C_LEXICAL_H
