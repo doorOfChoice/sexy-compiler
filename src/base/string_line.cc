@@ -127,7 +127,7 @@ StringLine::convert_string(const std::string *s) {
         ++it;
     }
     if (isAnnotation) {
-        errors.emplace_back(lineNumber, 0, "Brother, where is your annotation tail?");
+        errors.emplace_back(lineNumber, 0, 0,  "Brother, where is your annotation tail?");
     }
     return std::make_pair(sls, errors);
 }

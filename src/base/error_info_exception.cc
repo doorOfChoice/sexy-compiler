@@ -5,9 +5,13 @@
 #include "error_info_exception.h"
 #include <sstream>
 
-ErrorInfoException::ErrorInfoException(int row, int column, const std::string &s) : row(row), column(column) {
+ErrorInfoException::ErrorInfoException(int row, int column_begin, int column, const std::string &s) : row(row),
+                                                                                                      column_begin(
+                                                                                                              column_begin),
+                                                                                                      column(column) {
     std::ostringstream ost;
-    ost << "row: " << row << ", column: " << column << ", message: " << s << std::endl;
+    ost << "row: " << row << ", column_begin: " << column_begin << ", column: " << column << ", message: " << s
+        << std::endl;
     summary = ost.str();
 }
 

@@ -24,10 +24,11 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
     for (const auto &line : lines) {
         auto begin = line->get_text().begin();
         auto end = line->get_text().end();
-        auto it = line->get_text().begin();
+        auto it = begin;
         int lineNumber = line->get_line();
         while (it != end) {
             int column = it - begin + 1;
+            auto seg_begin = it;
             Meta meta = Meta(lineNumber, column, end);
             if (sutil::is_blank(*it))++it;
             else if (analyse_delimiter(it, meta));
@@ -37,7 +38,7 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
             else if (analyse_char(it, meta));
             else if (analyse_string(it, meta));
             else {
-                errors.emplace_back(lineNumber, it - begin + 1, string("Unknow Char: ") + *it);
+                errors.emplace_back(lineNumber, seg_begin - begin + 1, it - begin + 1, string("Unknow Char: ") + *it);
                 return;
             }
         }

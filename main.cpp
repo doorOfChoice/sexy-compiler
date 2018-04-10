@@ -39,12 +39,12 @@ void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoE
     for (const auto &it : v) {
         cout << fg::yellow << it->get_line() << fg::reset << ": ";
         for (int i = 0; i < it->get_text().size(); ++i) {
+            int column = i + 1;
             if (!errors.empty()) {
-                if(errors[0].get_row() == it->get_line()) {
+                if (errors[0].get_row() == it->get_line()) {
                     cout << bg::blue;
-                }
-                if (errors[0].get_row() == it->get_line() && errors[0].get_column() == i + 1) {
-                    cout << bg::red;
+                    if (column >= errors[0].get_column_begin() && column <= errors[0].get_column())
+                        cout << bg::red;
                 }
             }
             cout << it->get_text()[i];
@@ -52,6 +52,7 @@ void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoE
         }
     }
 }
+
 /**
  * 打印token表到token.txt文件下
  * @param v
@@ -59,14 +60,14 @@ void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoE
 void print_token(const vector<Token> &v) {
     fstream f;
     f.open("token.txt", ios::out);
-    for(const auto &it : v) {
+    for (const auto &it : v) {
         f << it.to_string() << endl;
     }
     f.close();
 }
 
 void print_errors(const vector<ErrorInfoException> &errors) {
-    cout << style::bold << bg::red << "\t\t错误表\t\t" << style::reset << bg::reset << endl;
+    cout << style::bold << bg::red << "\t\t\t错误表" << style::reset << bg::reset << endl;
     cout << fg::red;
     for (const auto &it : errors) {
         cout << it.what() << endl;
