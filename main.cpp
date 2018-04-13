@@ -72,6 +72,15 @@ void print_token(const vector<Token> &v) {
     f.close();
 }
 
+void print_symbols(const set<Symbol> &v) {
+    fstream f;
+    f.open("symbol.txt", ios::out);
+    for (const auto &it : v) {
+        f << it.to_string() << endl;
+    }
+    f.close();
+}
+
 void print_errors(const vector<ErrorInfoException> &errors) {
     cout << style::bold << bg::red << "\t\t\t错误表" << style::reset << bg::reset << endl;
     cout << fg::red;
@@ -103,6 +112,7 @@ int main(int argc, char **args) {
     print_code(lines.first, lexical.get_errors());
     print_errors(lexical.get_errors());
     print_token(lexical.get_tokens());
+    print_symbols(lexical.get_symbols());
 }
 
 /*

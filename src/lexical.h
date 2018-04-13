@@ -6,6 +6,8 @@
 #define C_LEXICAL_H
 
 
+#include <sstream>
+#include <utility>
 #include "base/table.h"
 
 using namespace std;
@@ -20,10 +22,32 @@ struct Meta {
     string::iterator cur_begin;
     string::iterator begin;
     string::iterator end;
+
     Meta() {}
 
     Meta(int line, int column, string::iterator &cur_begin, string::iterator &begin, string::iterator &end) : line(
             line), column(column), end(end), begin(begin), cur_begin(cur_begin) {}
+};
+
+struct Symbol {
+    int type;
+    string name;
+
+    Symbol(int type, string &name) : type(type), name(std::move(name)) {}
+
+    bool operator<(const Symbol &t1) const {
+        return !(type == t1.type && name == t1.name);
+    }
+
+    bool operator()(const Symbol &t1, const Symbol &t2) {
+        return !(t2.type == t1.type && t2.name == t1.name);
+    }
+
+    string to_string() const {
+        stringstream osf;
+        osf << Token::get_typename(type) << "\t\t" << name << endl;
+        return osf.str();
+    }
 };
 
 class lexical {
@@ -40,7 +64,7 @@ public:
 
     const vector<Token> &get_tokens() const;
 
-    const set<string> &get_identifiers() const;
+    const set<Symbol> &get_symbols() const;
 
     const vector<ErrorInfoException> &get_errors() const;
 
@@ -48,7 +72,8 @@ private:
     Table table;
     vector<Token> tokens;
     vector<ErrorInfoException> errors;
-    set<string> identifiers;
+    set<Symbol> symbols;
+
     /**
      * 分析数字常量
      * 详细图可以参看 https://github.com/doorOfChoice/sexy-compiler/blob/master/resource/number.png

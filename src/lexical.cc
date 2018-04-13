@@ -12,8 +12,8 @@ const vector<Token> &lexical::get_tokens() const {
     return tokens;
 }
 
-const set<string> &lexical::get_identifiers() const {
-    return identifiers;
+const set<Symbol> &lexical::get_symbols() const {
+    return symbols;
 }
 
 /**
@@ -210,6 +210,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
             case 10: {
                 Token t(m.line, m.column, Token::NUMBER, buf);
                 tokens.push_back(t);
+                symbols.insert(Symbol(t.type, t.name));
                 return true;
             }
         }
@@ -245,6 +246,9 @@ bool lexical::analyse_identifier(string::iterator &it, const Meta &m) {
             case 2: {
                 Token t(m.line, m.column, table.in_key(buf) ? Token::KEY_WORD : Token::IDENTIFIER, buf);
                 tokens.push_back(t);
+                if(t.type == Token::IDENTIFIER) {
+                    symbols.insert(Symbol(t.type, t.name));
+                }
                 return true;
             }
         }
@@ -394,6 +398,7 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
             case 6: {
                 Token t(m.line, m.column, Token::CHAR, buf);
                 tokens.push_back(t);
+                symbols.insert(Symbol(t.type, t.name));
                 return true;
             }
         }
@@ -490,6 +495,7 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
             case 5: {
                 Token t(m.line, m.column, Token::STRING, buf);
                 tokens.push_back(t);
+                symbols.insert(Symbol(t.type, t.name));
                 return true;
             }
         }
@@ -527,6 +533,7 @@ bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
             case 3: {
                 Token t(m.line, m.column, Token::ANNOTATION, buf);
                 tokens.push_back(t);
+                symbols.insert(Symbol(t.type, t.name));
                 return true;
             }
         }
