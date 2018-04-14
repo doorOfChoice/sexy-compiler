@@ -8,43 +8,36 @@
 #include <iostream>
 
 
-std::set<std::string> load(const std::string &fname) {
-    std::fstream f;
-    f.open(fname, std::ios::in);
-    char buf[4096];
-    if (f.is_open()) {
-        std::set<std::string> set;
-        while (!f.eof()) {
-            f.getline(buf, sizeof(buf) / sizeof(char));
-            set.insert({buf});
-        }
-        return set;
+void Table::load_keywords(const json &j) {
+    for(const auto &it : j["keywords"]) {
+        keyWords.insert(Symbol(sutil::trim_quotes(it[0]), it[1]));
     }
-    f.close();
-    return std::set<std::string>();
 }
 
-void Table::load_keywords(const std::string &fname) {
-    this->keyWords = load(fname);
+void Table::load_escape_chars(const json &j) {
+    for(const auto &it : j["escapes"]) {
+        std::string s = it;
+        escape_chars.insert(s);
+    }
 }
 
-void Table::load_escape_chars(const std::string &fname) {
-    this->escape_chars = load(fname);
+void Table::load_operators(const json &j) {
+    for(const auto &it : j["operators"]) {
+        operators.insert(Symbol(sutil::trim_quotes(it[0]), it[1]));
+    }
 }
 
-void Table::load_operators(const std::string &fname) {
-    this->operators = load(fname);
+void Table::load_delimiters(const json &j) {
+    for(const auto &it : j["delimiters"]) {
+        delimiters.insert(Symbol(sutil::trim_quotes(it[0]), it[1]));
+    }
 }
 
-void Table::load_delimiters(const std::string &fname) {
-    this->delimiters = load(fname);
-}
-
-const std::set<std::string> &Table::get_keywords() {
+const std::set<Symbol> &Table::get_keywords() {
     return keyWords;
 }
 
-const std::set<std::string> &Table::get_operators() {
+const std::set<Symbol> &Table::get_operators() {
     return operators;
 }
 
@@ -52,31 +45,34 @@ const std::set<std::string> &Table::get_escape_chars() {
     return escape_chars;
 }
 
-const std::set<std::string> &Table::get_delimiters() {
+const std::set<Symbol> &Table::get_delimiters() {
     return delimiters;
 }
 
 bool Table::in_key(const std::string &key) {
-    return std::find(keyWords.begin(), keyWords.end(), key) != keyWords.end();
+    return std::find(keyWords.begin(), keyWords.end(), Symbol(key, -1)) != keyWords.end();
 }
 
 bool Table::in_delimiter(const std::string &key) {
-    return std::find(delimiters.begin(), delimiters.end(), key) != delimiters.end();
+    return std::find(delimiters.begin(), delimiters.end(), Symbol(key, -1)) != delimiters.end();
 }
 
 bool Table::in_operator(const std::string &key) {
-    return std::find(operators.begin(), operators.end(), key) != operators.end();
+    return std::find(operators.begin(), operators.end(), Symbol(key, -1)) != operators.end();
 }
 
 bool Table::in_escape_chars(const char &ch) {
     return std::find(escape_chars.begin(), escape_chars.end(), std::string() + ch) != escape_chars.end();
 }
 
-void Table::load_all() {
-    load_keywords("keywords.txt");
-    load_operators("operators.txt");
-    load_delimiters("delimiters.txt");
-    load_escape_chars("escape_characters.txt");
+void Table::load_all(const std::string &fname) {
+    std::ifstream f(fname);
+    json j;
+    f >> j;
+    load_delimiters(j);
+    load_escape_chars(j);
+    load_keywords(j);
+    load_operators(j);
 }
 
 bool Table::in_delimiter(const char &ch) {
@@ -90,5 +86,4 @@ bool Table::in_operator(const char &ch) {
     s.push_back(ch);
     return in_operator(s);
 }
-
 

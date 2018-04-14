@@ -18,6 +18,8 @@ namespace sutil {
      */
     std::string trim(const std::string &);
 
+    std::string trim_quotes(const std::string &);
+
     /**
      * 判断是否是关键字
      * @return
@@ -35,6 +37,7 @@ namespace sutil {
      * @return
      */
     bool is_octal(const char &);
+
 }
 
 

@@ -29,26 +29,6 @@ struct Meta {
             line), column(column), end(end), begin(begin), cur_begin(cur_begin) {}
 };
 
-struct Symbol {
-    int type;
-    string name;
-
-    Symbol(int type, string &name) : type(type), name(std::move(name)) {}
-
-    bool operator<(const Symbol &t1) const {
-        return !(type == t1.type && name == t1.name);
-    }
-
-    bool operator()(const Symbol &t1, const Symbol &t2) {
-        return !(t2.type == t1.type && t2.name == t1.name);
-    }
-
-    string to_string() const {
-        stringstream osf;
-        osf << Token::get_typename(type) << "\t\t" << name << endl;
-        return osf.str();
-    }
-};
 
 class Lexical {
 public:

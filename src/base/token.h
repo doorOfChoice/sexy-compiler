@@ -32,5 +32,26 @@ public:
     static const int ANNOTATION = 8;
 };
 
+class Symbol {
+public:
+    int code = -1;
+    std::string name;
+
+    Symbol() = default;
+
+    Symbol(const std::string &s, int code) : code(code), name(name) {}
+
+    bool operator<(const Symbol &s) const {
+        return !(code == s.code && name == s.name);
+    }
+
+    bool operator()(const Symbol &t1, const Symbol &t2) {
+        return !(t2.code == t1.code && t2.name == t1.name);
+    }
+
+    bool operator==(const Symbol &s) const {
+        return name == s.name;
+    }
+};
 
 #endif //C_TOKEN_H

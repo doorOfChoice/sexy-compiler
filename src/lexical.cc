@@ -210,7 +210,7 @@ bool Lexical::analyse_number(string::iterator &it, const Meta &m) {
             case 10: {
                 Token t(m.line, m.column, Token::NUMBER, buf);
                 tokens.push_back(t);
-                symbols.insert(Symbol(t.type, t.name));
+                symbols.insert(Symbol(t.name, t.type));
                 return true;
             }
         }
@@ -246,8 +246,8 @@ bool Lexical::analyse_identifier(string::iterator &it, const Meta &m) {
             case 2: {
                 Token t(m.line, m.column, table.in_key(buf) ? Token::KEY_WORD : Token::IDENTIFIER, buf);
                 tokens.push_back(t);
-                if(t.type == Token::IDENTIFIER) {
-                    symbols.insert(Symbol(t.type, t.name));
+                if (t.type == Token::IDENTIFIER) {
+                    symbols.insert(Symbol(t.name, t.type));
                 }
                 return true;
             }
@@ -398,7 +398,7 @@ bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
             case 6: {
                 Token t(m.line, m.column, Token::CHAR, buf);
                 tokens.push_back(t);
-                symbols.insert(Symbol(t.type, t.name));
+                symbols.insert(Symbol(t.name, t.type));
                 return true;
             }
         }
@@ -495,7 +495,7 @@ bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
             case 5: {
                 Token t(m.line, m.column, Token::STRING, buf);
                 tokens.push_back(t);
-                symbols.insert(Symbol(t.type, t.name));
+                symbols.insert(Symbol(t.name, t.type));
                 return true;
             }
         }
@@ -514,7 +514,7 @@ bool Lexical::analyse_annotation(string::iterator &it, const Meta &m) {
                 break;
             }
             case 1: {
-                if (!sutil::is_key(*it, true)){
+                if (!sutil::is_key(*it, true)) {
                     error(it, m, "注解的不能以非字母开头");
                     return false;
                 }
@@ -533,7 +533,7 @@ bool Lexical::analyse_annotation(string::iterator &it, const Meta &m) {
             case 3: {
                 Token t(m.line, m.column, Token::ANNOTATION, buf);
                 tokens.push_back(t);
-                symbols.insert(Symbol(t.type, t.name));
+                symbols.insert(Symbol(t.name, t.type));
                 return true;
             }
         }

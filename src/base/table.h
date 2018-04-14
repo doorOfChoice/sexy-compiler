@@ -11,24 +11,19 @@
 #include <set>
 #include "token.h"
 #include "string_line.h"
+#include "../plugins/json.hpp"
+
+using json = nlohmann::json;
 
 class Table {
 public:
-    void load_keywords(const std::string &fname);
+    void load_all(const std::string &fname);
 
-    void load_operators(const std::string &fname);
+    const std::set<Symbol> &get_keywords();
 
-    void load_delimiters(const std::string &fname);
+    const std::set<Symbol> &get_operators();
 
-    void load_escape_chars(const std::string &fname);
-
-    void load_all();
-
-    const std::set<std::string> &get_keywords();
-
-    const std::set<std::string> &get_operators();
-
-    const std::set<std::string> &get_delimiters();
+    const std::set<Symbol> &get_delimiters();
 
     const std::set<std::string> &get_escape_chars();
 
@@ -43,11 +38,20 @@ public:
     bool in_operator(const char &ch);
 
     bool in_escape_chars(const char &ch);
+
 private:
-    std::set<std::string> keyWords;
-    std::set<std::string> operators;
-    std::set<std::string> delimiters;
+    std::set<Symbol> keyWords;
+    std::set<Symbol> operators;
+    std::set<Symbol> delimiters;
     std::set<std::string> escape_chars;
+
+    void load_keywords(const json &);
+
+    void load_operators(const json &);
+
+    void load_delimiters(const json &);
+
+    void load_escape_chars(const json &);
 };
 
 
