@@ -114,7 +114,6 @@ StringLine::convert_string(const std::string *s) {
                 } else if (*it != '\n') {
                     sl->set_line(lineNumber);
                     sl->get_text().push_back(*it);
-                    state = 6;
                 } else {
                     state = 3;
                     --it;
@@ -124,6 +123,10 @@ StringLine::convert_string(const std::string *s) {
             }
         }
         ++it;
+    }
+    if(!sl->get_text().empty()) {
+        sl->get_text().push_back('\n');
+        sls.push_back(sl);
     }
     if (isAnnotation) {
         errors.emplace_back(lineNumber, 0, 0,  "Brother, where is your annotation tail?");
