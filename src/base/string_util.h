@@ -8,8 +8,10 @@
 
 
 #include <string>
+#include <memory>
 
 namespace sutil {
+    std::shared_ptr<std::string> readCode(const std::string &fname);
     /**
      * 去除两边的空白符号，包括\t和\n
      * @return

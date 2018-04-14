@@ -2,17 +2,17 @@
 #include "lexical.h"
 #include "base/string_util.h"
 
-lexical::lexical(const Table &table) : table(table) {}
+Lexical::Lexical(const Table &table) : table(table) {}
 
-const vector<ErrorInfoException> &lexical::get_errors() const {
+const vector<ErrorInfoException> &Lexical::get_errors() const {
     return errors;
 }
 
-const vector<Token> &lexical::get_tokens() const {
+const vector<Token> &Lexical::get_tokens() const {
     return tokens;
 }
 
-const set<Symbol> &lexical::get_symbols() const {
+const set<Symbol> &Lexical::get_symbols() const {
     return symbols;
 }
 
@@ -20,7 +20,7 @@ const set<Symbol> &lexical::get_symbols() const {
  * 词法分析的入口
  * @param lines 需要分析的行段
  */
-void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
+void Lexical::analyse(vector<shared_ptr<StringLine>> lines) {
     Meta meta;
     for (const auto &line : lines) {
         auto begin = line->get_text().begin();
@@ -62,7 +62,7 @@ void lexical::analyse(vector<shared_ptr<StringLine>> lines) {
  * @param m
  * @return
  */
-bool lexical::analyse_number(string::iterator &it, const Meta &m) {
+bool Lexical::analyse_number(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     while (it != m.end) {
@@ -225,7 +225,7 @@ bool lexical::analyse_number(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool lexical::analyse_identifier(string::iterator &it, const Meta &m) {
+bool Lexical::analyse_identifier(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     while (it != m.end) {
@@ -263,7 +263,7 @@ bool lexical::analyse_identifier(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool lexical::analyse_delimiter(string::iterator &it, const Meta &m) {
+bool Lexical::analyse_delimiter(string::iterator &it, const Meta &m) {
     string buf;
     buf.push_back(*it);
     if (table.in_delimiter(buf)) {
@@ -281,7 +281,7 @@ bool lexical::analyse_delimiter(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool lexical::analyse_operator(string::iterator &it, const Meta &m) {
+bool Lexical::analyse_operator(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     while (it != m.end) {
@@ -317,7 +317,7 @@ bool lexical::analyse_operator(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool lexical::analyse_char(string::iterator &it, const Meta &m) {
+bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     int countU = 0;
@@ -413,7 +413,7 @@ bool lexical::analyse_char(string::iterator &it, const Meta &m) {
  * @param m
  * @return
  */
-bool lexical::analyse_string(string::iterator &it, const Meta &m) {
+bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
 
@@ -504,7 +504,7 @@ bool lexical::analyse_string(string::iterator &it, const Meta &m) {
     return false;
 }
 
-bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
+bool Lexical::analyse_annotation(string::iterator &it, const Meta &m) {
     int state = 0;
     string buf;
     while (it != m.end) {
@@ -542,7 +542,7 @@ bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
     return false;
 }
 
-bool lexical::error(string::iterator &it, const Meta &m, const string &message) {
+bool Lexical::error(string::iterator &it, const Meta &m, const string &message) {
     errors.emplace_back(m.line, m.column, it - m.begin + 1, message + ":" + string(m.cur_begin, it + 1));
 //    while (it != m.end && !sutil::is_blank(*it) && !table.in_delimiter(*it))++it;
     ++it;

@@ -7,96 +7,18 @@
 #include "src/base/table.h"
 #include "src/base/error_info_exception.h"
 #include "src/lexical.h"
+#include "src/base/string_util.h"
 
 using namespace std;
 using namespace rang;
 
-/**
- * 从文件中读取数据
- * @param fname 文件名
- * @return 可自动回收的字符串指针
- */
-shared_ptr<string> readCode(const string &fname) {
-    fstream f;
-    f.open(fname, ios::in);
-    shared_ptr<string> s(new string());
-    char buf[4096];
-    if (f.is_open()) {
-        while (!f.eof()) {
-            f.getline(buf, sizeof(buf) / sizeof(char));
-            s->append(buf);
-            s->append("\n");
-        }
-        f.close();
-    } else {
-        cout << "File " << fname << " is not exist" << endl;
-    }
-    return s;
-}
-
-void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoException> &errors) {
-    system("clear");
-    auto eit = errors.begin();
-    auto end = errors.end();
-    for (const auto &it : v) {
-        cout << fg::yellow << it->get_line() << fg::reset << ": ";
-        for (int i = 0; i < it->get_text().size(); ++i) {
-            int column = i + 1;
-            if (eit != end) {
-                if((it->get_line() == eit->get_row() && column > eit->get_column()) || it->get_line() > eit->get_row())
-                    ++eit;
-                if (eit->get_row() == it->get_line()) {
-                    if (column >= eit->get_column_begin() && column <= eit->get_column()) {
-                        cout << bg::red << style::underline;
-                    }
-                }
-            }
-            cout << it->get_text()[i];
-            if (eit != end)
-                cout << bg::reset << fg::reset << style::reset;
-        }
-
-    }
-}
-
-/**
- * 打印token表到token.txt文件下
- * @param v
- */
-void print_token(const vector<Token> &v) {
-    fstream f;
-    f.open("token.txt", ios::out);
-    for (const auto &it : v) {
-        f << it.to_string() << endl;
-    }
-    f.close();
-}
-
-void print_errors(const vector<ErrorInfoException> &errors) {
-    cout << style::bold << bg::red << "\t\t\t错误表" << style::reset << bg::reset << endl;
-    cout << fg::red;
-    for (const auto &it : errors) {
-        cout << it.what() << endl;
-    }
-    cout << fg::reset;
-}
-
-void print_symbol(const lexical &lexical) {
-    fstream f;
-    f.open("symbol.txt", ios::out);
-    for (const auto &it : lexical.get_symbols()) {
-        f << it.to_string() << endl;
-    }
-    f.close();
-}
 
 int main(int argc, char **args) {
     string filename = argc < 2 ? "code.java" : args[1];
-
     /**
      * 去除注释
      */
-    auto lines = StringLine::convert_string(readCode(filename).get());
+    auto lines = StringLine::convert_string(sutil::readCode(filename).get());
     /**
      * 加载 关键字、运算符、分隔符表
      */
@@ -105,14 +27,9 @@ int main(int argc, char **args) {
     /**
      * 调用词法分析器
      */
-    lexical lexical(table);
+    Lexical lexical(table);
     lexical.analyse(lines.first);
 
-
-    print_code(lines.first, lexical.get_errors());
-    print_errors(lexical.get_errors());
-    print_token(lexical.get_tokens());
-    print_symbol(lexical);
 }
 
 /*

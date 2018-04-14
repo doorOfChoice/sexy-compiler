@@ -50,11 +50,11 @@ struct Symbol {
     }
 };
 
-class lexical {
+class Lexical {
 public:
-    lexical() = default;
+    Lexical() = default;
 
-    lexical(const Table &table);
+    Lexical(const Table &table);
 
     /**
     * 生成token表

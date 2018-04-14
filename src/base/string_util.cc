@@ -2,7 +2,33 @@
 // Created by dawndevil on 2018/4/7.
 //
 
+#include <fstream>
+#include <iostream>
 #include "string_util.h"
+
+
+/**
+ * 从文件中读取数据
+ * @param fname 文件名
+ * @return 可自动回收的字符串指针
+ */
+std::shared_ptr<std::string> readCode(const std::string &fname) {
+    std::fstream f;
+    f.open(fname, std::ios::in);
+    std::shared_ptr<std::string> s(new std::string());
+    char buf[4096];
+    if (f.is_open()) {
+        while (!f.eof()) {
+            f.getline(buf, sizeof(buf) / sizeof(char));
+            s->append(buf);
+            s->append("\n");
+        }
+        f.close();
+    } else {
+        std::cout << "File " << fname << " is not exist" << std::endl;
+    }
+    return s;
+}
 
 /**
  * 去除包含\n在内的Left AND Right 空白字符
