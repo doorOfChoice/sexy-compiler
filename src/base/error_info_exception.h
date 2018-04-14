@@ -8,27 +8,39 @@
 
 #include <string>
 #include <exception>
+#include "../plugins/json.hpp"
 
-class ErrorInfoException : public std::exception {
-public:
-    ErrorInfoException(int row, int column_begin, int column, const std::string &);
+using json = nlohmann::json;
 
-    ErrorInfoException();
+namespace errorinfo {
+    class ErrorInfoException : public std::exception {
+    public:
+        ErrorInfoException(int row, int column_begin, int column, const std::string &);
 
-    const char *what() const noexcept override;
+        ErrorInfoException();
 
-    int get_row() const { return row; }
+        const char *what() const noexcept override;
 
-    int get_column_begin()const { return column_begin; }
+        int get_row() const { return row; }
 
-    int get_column() const { return column; }
+        int get_column_begin() const { return column_begin; }
 
-private:
-    int row;
-    int column_begin;
-    int column;
-    std::string summary;
-};
+        int get_column() const { return column; }
 
+    private:
+        int row;
+        int column_begin;
+        int column;
+        std::string summary;
+    };
+
+    inline void to_json(json &j, const ErrorInfoException &p) {
+        j = json{{"row",          p.get_row()},
+                 {"column_begin", p.get_column_begin()},
+                 {"column_end",   p.get_column()},
+                 {"summary",      p.what()}
+        };
+    }
+}
 
 #endif //C_ERRORINFO_H

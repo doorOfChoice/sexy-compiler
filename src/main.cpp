@@ -13,29 +13,29 @@
 using namespace std;
 using namespace rang;
 
-int main(int argc, char **args) {
-    string filename = argc < 2 ? "code.java" : args[1];
-    /**
-     * 去除注释
-     */
-    auto lines = StringLine::convert_string(sutil::readCode(filename).get());
-    /**
-     * 加载 关键字、运算符、分隔符表
-     */
+shared_ptr<Lexical> lexical(const string &s) {
+    auto sls = StringLine::convert_string(&s);
     Table table;
     table.load_all("data.json");
-    /**
-     * 调用词法分析器
-     */
-    Lexical lexical(table);
-    lexical.analyse(lines.first);
-//    crow::SimpleApp app;
-//
-//    CROW_ROUTE(app, "/")([](){
-//        return "Hello world";
-//    });
-//
-//    app.port(18080).multithreaded().run();
+    auto lex = make_shared<Lexical>(table);
+    lex->analyse(sls.first);
+    return lex;
+}
+
+int main(int argc, char **args) {
+    crow::SimpleApp app;
+
+    CROW_ROUTE(app, "/code").methods("POST"_method)([](const crow::request &req) {
+        auto body = crow::json::load(req.body);
+        auto lex = lexical(body["code"].s());
+        json j;
+        j["token"] = lex->get_tokens();
+        j["errors"] = lex->get_errors();
+        j["symbol"] = lex->get_symbols();
+        return crow::response{j.dump()};
+    });
+
+    app.port(8080).multithreaded().run();
     return 0;
 }
 

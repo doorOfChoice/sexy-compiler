@@ -6,52 +6,40 @@
 #define C_TOKEN_H
 
 #include <string>
+#include "../plugins/json.hpp"
 
-class Token {
-public:
-    int row;
-    int column;
-    int type;
-    std::string name;
+using json = nlohmann::json;
 
-    Token(int row, int column, int type, const std::string &name);
+namespace token {
+    class Token {
+    public:
+        int row;
+        int column;
+        int type;
+        std::string name;
 
-    Token();
+        Token(int row, int column, int type, const std::string &name);
 
-    std::string to_string() const;
+        Token();
 
-    static std::string get_typename(int type);
+        std::string to_string() const;
 
-    static const int KEY_WORD = 1;
-    static const int OPERATOR = 2;
-    static const int DELIMITERS = 3;
-    static const int IDENTIFIER = 4;
-    static const int NUMBER = 5;
-    static const int STRING = 6;
-    static const int CHAR = 7;
-    static const int ANNOTATION = 8;
-};
+        static std::string get_typename(int type);
 
-class Symbol {
-public:
-    int code = -1;
-    std::string name;
+        static const int IDENTIFIER = 146;
+        static const int NUMBER = 147;
+        static const int STRING = 148;
+        static const int CHAR = 149;
+        static const int ANNOTATION = 150;
+    };
 
-    Symbol() = default;
-
-    Symbol(const std::string &s, int code) : code(code), name(name) {}
-
-    bool operator<(const Symbol &s) const {
-        return !(code == s.code && name == s.name);
+    inline void to_json(json &j, const Token &p) {
+        j = json{{"code",     p.type},
+                 {"codeName", Token::get_typename(p.type)},
+                 {"row",      p.row},
+                 {"column",   p.column},
+                 {"value",    p.name}};
     }
-
-    bool operator()(const Symbol &t1, const Symbol &t2) {
-        return !(t2.code == t1.code && t2.name == t1.name);
-    }
-
-    bool operator==(const Symbol &s) const {
-        return name == s.name;
-    }
-};
+}
 
 #endif //C_TOKEN_H

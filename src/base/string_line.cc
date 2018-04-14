@@ -7,7 +7,6 @@
 #include "string_line.h"
 #include "error_info_exception.h"
 #include "string_util.h"
-
 /**
  * 有限状态机进行去注释，但是保留相应的行数和列数
  *
@@ -22,10 +21,10 @@
  * @param s 需要进行分割的文本
  * @return StringLine集合 + 错误信息列表
  */
-std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<ErrorInfoException>>
+std::pair<std::vector<std::shared_ptr<StringLine>>, std::vector<errorinfo::ErrorInfoException>>
 StringLine::convert_string(const std::string *s) {
     std::vector<std::shared_ptr<StringLine>> sls;
-    std::vector<ErrorInfoException> errors;
+    std::vector<errorinfo::ErrorInfoException> errors;
     int lineNumber = 1;
     auto it = s->begin();
     //StringLine

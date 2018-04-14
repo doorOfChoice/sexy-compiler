@@ -12,6 +12,7 @@
 #include "token.h"
 #include "string_line.h"
 #include "../plugins/json.hpp"
+#include "symbol.h"
 
 using json = nlohmann::json;
 
@@ -19,11 +20,11 @@ class Table {
 public:
     void load_all(const std::string &fname);
 
-    const std::set<Symbol> &get_keywords();
+    const std::set<symbol::Symbol> &get_keywords();
 
-    const std::set<Symbol> &get_operators();
+    const std::set<symbol::Symbol> &get_operators();
 
-    const std::set<Symbol> &get_delimiters();
+    const std::set<symbol::Symbol> &get_delimiters();
 
     const std::set<std::string> &get_escape_chars();
 
@@ -39,10 +40,16 @@ public:
 
     bool in_escape_chars(const char &ch);
 
+    symbol::Symbol get_key(const std::string &key);
+
+    symbol::Symbol get_operator(const std::string &key);
+
+    symbol::Symbol get_delimiter(const std::string &key);
+
 private:
-    std::set<Symbol> keyWords;
-    std::set<Symbol> operators;
-    std::set<Symbol> delimiters;
+    std::set<symbol::Symbol> keyWords;
+    std::set<symbol::Symbol> operators;
+    std::set<symbol::Symbol> delimiters;
     std::set<std::string> escape_chars;
 
     void load_keywords(const json &);

@@ -11,7 +11,9 @@
 #include "base/table.h"
 
 using namespace std;
-
+using token::Token;
+using symbol::Symbol;
+using errorinfo::ErrorInfoException;
 /**
  * 元数据结构
  * 单纯用来存储 行、列、迭代器终点

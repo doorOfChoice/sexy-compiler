@@ -244,7 +244,10 @@ bool Lexical::analyse_identifier(string::iterator &it, const Meta &m) {
                 break;
             }
             case 2: {
-                Token t(m.line, m.column, table.in_key(buf) ? Token::KEY_WORD : Token::IDENTIFIER, buf);
+                Token t(m.line, m.column, Token::IDENTIFIER, buf);
+                if(table.in_key(buf)) {
+                    t.type = table.get_key(buf).code;
+                }
                 tokens.push_back(t);
                 if (t.type == Token::IDENTIFIER) {
                     symbols.insert(Symbol(t.name, t.type));
@@ -267,7 +270,7 @@ bool Lexical::analyse_delimiter(string::iterator &it, const Meta &m) {
     string buf;
     buf.push_back(*it);
     if (table.in_delimiter(buf)) {
-        Token t(m.line, m.column, Token::DELIMITERS, buf);
+        Token t(m.line, m.column, table.get_delimiter(buf).code, buf);
         tokens.push_back(t);
         ++it;
         return true;
@@ -301,7 +304,7 @@ bool Lexical::analyse_operator(string::iterator &it, const Meta &m) {
                 break;
             }
             case 2: {
-                Token t(m.line, m.column, Token::OPERATOR, buf);
+                Token t(m.line, m.column, table.get_operator(buf).code, buf);
                 tokens.push_back(t);
                 return true;
             }
