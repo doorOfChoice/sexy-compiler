@@ -544,7 +544,8 @@ bool lexical::analyse_annotation(string::iterator &it, const Meta &m) {
 
 bool lexical::error(string::iterator &it, const Meta &m, const string &message) {
     errors.emplace_back(m.line, m.column, it - m.begin + 1, message + ":" + string(m.cur_begin, it + 1));
-    while (it != m.end && !sutil::is_blank(*it) && !table.in_delimiter(*it))++it;
+//    while (it != m.end && !sutil::is_blank(*it) && !table.in_delimiter(*it))++it;
+    ++it;
     return false;
 }
 

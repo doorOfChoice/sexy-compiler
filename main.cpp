@@ -34,38 +34,28 @@ shared_ptr<string> readCode(const string &fname) {
     return s;
 }
 
-void print_error_color(
-        __gnu_cxx::__normal_iterator<const ErrorInfoException *, vector<ErrorInfoException, allocator<ErrorInfoException>>> &eit,
-        const vector<ErrorInfoException> &errors, const shared_ptr<StringLine> &sl, int column) {
-    if (eit != errors.end()) {
-        if ((sl->get_line() == eit->get_row() && column > eit->get_column()) || sl->get_line() > eit->get_row())
-            ++eit;
-        if (eit->get_row() == sl->get_line()) {
-            if (column >= eit->get_column_begin() && column <= eit->get_column()) {
-                cout << bg::red << style::underline;
-            }
-        }
-    }
-}
-
-void reset_error_color(
-        __gnu_cxx::__normal_iterator<const ErrorInfoException *, vector<ErrorInfoException, allocator<ErrorInfoException>>> &eit,
-        const vector<ErrorInfoException> &errors) {
-    if (eit != errors.end())
-        cout << bg::reset << fg::reset << style::reset;
-}
-
 void print_code(const vector<shared_ptr<StringLine>> &v, const vector<ErrorInfoException> &errors) {
     system("clear");
-    __gnu_cxx::__normal_iterator<const ErrorInfoException *, vector<ErrorInfoException, allocator<ErrorInfoException>>> eit = errors.begin();
+    auto eit = errors.begin();
+    auto end = errors.end();
     for (const auto &it : v) {
         cout << fg::yellow << it->get_line() << fg::reset << ": ";
         for (int i = 0; i < it->get_text().size(); ++i) {
             int column = i + 1;
-            print_error_color(eit, errors, it, column);
+            if (eit != end) {
+                if((it->get_line() == eit->get_row() && column > eit->get_column()) || it->get_line() > eit->get_row())
+                    ++eit;
+                if (eit->get_row() == it->get_line()) {
+                    if (column >= eit->get_column_begin() && column <= eit->get_column()) {
+                        cout << bg::red << style::underline;
+                    }
+                }
+            }
             cout << it->get_text()[i];
+            if (eit != end)
+                cout << bg::reset << fg::reset << style::reset;
         }
-        reset_error_color(eit, errors);
+
     }
 }
 
@@ -82,15 +72,6 @@ void print_token(const vector<Token> &v) {
     f.close();
 }
 
-void print_symbols(const set<Symbol> &v) {
-    fstream f;
-    f.open("symbol.txt", ios::out);
-    for (const auto &it : v) {
-        f << it.to_string() << endl;
-    }
-    f.close();
-}
-
 void print_errors(const vector<ErrorInfoException> &errors) {
     cout << style::bold << bg::red << "\t\t\t错误表" << style::reset << bg::reset << endl;
     cout << fg::red;
@@ -98,6 +79,15 @@ void print_errors(const vector<ErrorInfoException> &errors) {
         cout << it.what() << endl;
     }
     cout << fg::reset;
+}
+
+void print_symbol(const lexical &lexical) {
+    fstream f;
+    f.open("symbol.txt", ios::out);
+    for (const auto &it : lexical.get_symbols()) {
+        f << it.to_string() << endl;
+    }
+    f.close();
 }
 
 int main(int argc, char **args) {
@@ -122,7 +112,7 @@ int main(int argc, char **args) {
     print_code(lines.first, lexical.get_errors());
     print_errors(lexical.get_errors());
     print_token(lexical.get_tokens());
-    print_symbols(lexical.get_symbols());
+    print_symbol(lexical);
 }
 
 /*
