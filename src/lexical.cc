@@ -325,6 +325,7 @@ bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
     string buf;
     int countU = 0;
     int countO = 0;
+    bool success = true;
     while (it != m.end) {
         switch (state) {
             case 0: {
@@ -343,7 +344,9 @@ bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
             case 2: {
                 if (*it != '\'') {
                     error(it, m, "非法的字符结尾");
-                    return false;
+                    success = false;
+                    state = 1;
+                    --it;
                 }
                 state = 6;
                 break;
@@ -361,7 +364,9 @@ bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
                     buf.pop_back();
                 } else {
                     error(it, m, "非法的转义字符");
-                    return false;
+                    success = false;
+                    state = 1;
+                    --it;
                 }
                 break;
             }
@@ -371,7 +376,9 @@ bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
                     if (isxdigit(*it))buf.push_back(*it);
                     else {
                         error(it, m, "unicode表示法需要4位16进制数");
-                        return false;
+                        success = false;
+                        state = 1;
+                        --it;
                     }
                 } else {
                     --it;
@@ -390,7 +397,9 @@ bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
                         state = 2;
                     } else {
                         error(it, m, "八进制字符需要1-3位八进制数");
-                        return false;
+                        success = false;
+                        state = 1;
+                        --it;
                     }
                 } else {
                     --it;
@@ -399,10 +408,14 @@ bool Lexical::analyse_char(string::iterator &it, const Meta &m) {
                 break;
             }
             case 6: {
-                Token t(m.line, m.column, Token::CHAR, buf);
-                tokens.push_back(t);
-                symbols.insert(Symbol(t.name, t.type));
-                return true;
+                if(success) {
+                    Token t(m.line, m.column, Token::CHAR, buf);
+                    tokens.push_back(t);
+                    symbols.insert(Symbol(t.name, t.type));
+                    return true;
+                }
+                return false;
+
             }
         }
         ++it;
@@ -423,6 +436,7 @@ bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
     //判断是否是需要转义的字符
     int countU = 0;
     int countO = 0;
+    bool success = true;
     while (it != m.end) {
         switch (state) {
             case 0: {
@@ -454,7 +468,9 @@ bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
                     state = 4;
                 } else {
                     error(it, m, "非法的转义字符");
-                    return false;
+                    success =false;
+                    state = 1;
+                    --it;
                 }
                 break;
             }
@@ -464,7 +480,9 @@ bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
                     if (isxdigit(*it))buf.push_back(*it);
                     else {
                         error(it, m, "unicode表示法需要4位16进制数");
-                        return false;
+                        success =false;
+                        state = 1;
+                        --it;
                     }
                 } else {
                     --it;
@@ -488,7 +506,9 @@ bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
                         init();
                     } else {
                         error(it, m, "八进制字符需要1-3位八进制数");
-                        return false;
+                        success =false;
+                        state = 1;
+                        --it;
                     }
                 } else
                     init();
@@ -496,10 +516,13 @@ bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
                 break;
             }
             case 5: {
-                Token t(m.line, m.column, Token::STRING, buf);
-                tokens.push_back(t);
-                symbols.insert(Symbol(t.name, t.type));
-                return true;
+                if(success) {
+                    Token t(m.line, m.column, Token::STRING, buf);
+                    tokens.push_back(t);
+                    symbols.insert(Symbol(t.name, t.type));
+                    return true;
+                }
+                return false;
             }
         }
         ++it;
