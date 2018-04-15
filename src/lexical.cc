@@ -245,7 +245,7 @@ bool Lexical::analyse_identifier(string::iterator &it, const Meta &m) {
             }
             case 2: {
                 Token t(m.line, m.column, Token::IDENTIFIER, buf);
-                if(table.in_key(buf)) {
+                if (table.in_key(buf)) {
                     t.type = table.get_key(buf).code;
                 }
                 tokens.push_back(t);
@@ -504,6 +504,7 @@ bool Lexical::analyse_string(string::iterator &it, const Meta &m) {
         }
         ++it;
     }
+    error(it, m, "没有边界的字符串");
     return false;
 }
 
@@ -548,7 +549,7 @@ bool Lexical::analyse_annotation(string::iterator &it, const Meta &m) {
 bool Lexical::error(string::iterator &it, const Meta &m, const string &message) {
     errors.emplace_back(m.line, m.column, it - m.begin + 1, message + ":" + string(m.cur_begin, it + 1));
 //    while (it != m.end && !sutil::is_blank(*it) && !table.in_delimiter(*it))++it;
-    ++it;
+    if (it != m.end) ++it;
     return false;
 }
 

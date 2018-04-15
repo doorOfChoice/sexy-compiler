@@ -40,10 +40,9 @@ int main(int argc, char **args) {
             cout << "options" << endl;
             return crossrep();
         }
-        cout << req.body << endl;
         auto body = crow::json::load(req.body);
         auto lex = lexical(body["code"].s());
-
+        cout << "分析完毕" << endl;
         json j;
         j["token"] = lex->get_tokens();
         j["errors"] = lex->get_errors();
